@@ -3,10 +3,13 @@
     "compilerOptions": {
         "module": "NodeNext",
         "moduleResolution": "NodeNext",
+        // "allowImportingTsExtensions": true,
         "target": "ES2022",
         "outDir": "dist",
         "noUnusedLocals": false,
-        "lib": ["DOM"]
+        "lib": [
+            "DOM"
+        ]
     },
     "include": [
         "./src/**/*"
