@@ -1,8 +1,8 @@
-# Crawlee + PlaywrightCrawler + TypeScript project
+# [UIUC.chat](https://uiuc.chat)'s Web Crawler
 
-This template is a production ready boilerplate for developing with `PlaywrightCrawler`. Use this to bootstrap your projects using the most up-to-date code.
+Hosted on Railway.app. I found Railway preferable to severless functions because it easily handles the large bundle size introduced by using Chromium for full javascript execution during web crawling.
 
-If you're looking for examples or want to learn more visit:
+### It's powered by the excellent Crawlee.dev
 
 - [Documentation](https://crawlee.dev/api/playwright-crawler/class/PlaywrightCrawler)
 - [Examples](https://crawlee.dev/docs/examples/playwright-crawler)
