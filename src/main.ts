@@ -1,8 +1,10 @@
 // uploadToS3.ts
 import express, { Request, Response } from 'express';
 import { crawl } from './api/crawlee.js';
+import cors from 'cors';
 
 const app = express();
+app.use(cors()); // Enable CORS for all routes and origins
 app.use(express.json());
 
 app.post('/crawl', async (req: Request, res: Response) => {

@@ -7,6 +7,7 @@
         "@aws-sdk/client-s3": "^3.495.0",
         "@aws-sdk/s3-presigned-post": "^3.495.0",
         "axios": "^1.6.5",
+        "cors": "^2.8.5",
         "crawlee": "^3.0.0",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
@@ -15,6 +16,7 @@
     },
     "devDependencies": {
         "@apify/tsconfig": "^0.1.0",
+        "@types/cors": "^2.8.17",
         "@types/express": "^4.17.21",
         "@types/node": "^20.0.0",
         "tsx": "^4.4.0",
