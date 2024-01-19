@@ -22,6 +22,10 @@ app.post('/crawl', async (req: Request, res: Response) => {
     } catch (error) {
         const e = error as Error;
         res.status(500).json({ error: 'An error occurred during the upload', errorTitle: e.name, errorMessage: e.message });
+    } finally {
+        if (global.gc) {
+            global.gc();
+        }
     }
 });
 
