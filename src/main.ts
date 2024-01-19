@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import { crawl } from './api/crawlee.js';
 
 const app = express();
-app.use(express.json()); // Middleware to parse JSON bodies
+app.use(express.json());
 
 app.post('/crawl', async (req: Request, res: Response) => {
     try {
@@ -17,7 +17,6 @@ app.post('/crawl', async (req: Request, res: Response) => {
             maxTokens,
         };
 
-        // Assuming crawl is a function from the legacy code that needs to be implemented
         const results = await crawl(config);
         res.status(200).json(results);
     } catch (error) {
