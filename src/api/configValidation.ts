@@ -19,7 +19,13 @@ export const configSchema = z.object({
      * @example "https://www.builder.io/c/docs/**"
      * @default ""
      */
-    match: z.string().or(z.array(z.string())),
+    match: z.string().or(z.array(z.string())).optional(),
+    /**
+     * If true use enqueueLinks strategy: 'same-domain', otherwise use strategy: 'all' which wanders the internet
+     * @example "true"
+     * @default true
+     */
+    stayOnBaseUrl: z.boolean(),
     /**
      * Pattern to match against for links on a page to exclude from crawling
      * @example "https://www.builder.io/c/docs/**"

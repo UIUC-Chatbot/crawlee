@@ -16,13 +16,13 @@ app.use(express.json());
 app.post('/crawl', async (req: Request, res: Response) => {
     console.log('in /crawl. req.body:', req.body)
     try {
-        const { url, match, maxPagesToCrawl, maxTokens, courseName } = req.body.params;
-        console.log('in /crawl -- got variables :) url:', url, 'match:', match, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName)
+        const { url, stayOnBaseUrl, maxPagesToCrawl, maxTokens, courseName } = req.body.params;
+        console.log('in /crawl -- got variables :) url:', url, 'stayOnBaseUrl:', stayOnBaseUrl, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName)
 
         const config = {
             url,
-            match,
-            // stayOnBaseUrl, // TODO instead of match
+            // match, // Deprecated
+            stayOnBaseUrl,
             maxPagesToCrawl,
             courseName,
             maxTokens,
