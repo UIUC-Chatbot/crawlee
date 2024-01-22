@@ -29,7 +29,7 @@ app.post('/crawl', async (req: Request, res: Response) => {
         };
 
         const results = await crawl(config);
-        // console.log('Completed crawl. Results:', results)
+        console.log(`Crawl completed successfully. Number of results: ${results.length}`);
         res.status(200).json(results);
     } catch (error) {
         const e = error as Error;
