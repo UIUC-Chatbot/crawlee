@@ -18,7 +18,6 @@ export async function crawl(config: Config) {
       // PlaywrightCrawler crawls the web using a headless
       // browser controlled by the Playwright library.
       const crawler = new PlaywrightCrawler({
-        // enqueueStrategy: "same-domain", // or 'all'
         // Use the requestHandler to process each of the crawled pages.
         async requestHandler({ request, page, enqueueLinks, log, pushData }) {
           console.log(`Crawling: ${request.loadedUrl}...`);
@@ -129,7 +128,6 @@ export async function crawl(config: Config) {
       },
         new Configuration({
           persistStorage: false,
-          EnqueueStrategy: config.enqueueStrategy ?? "same-domain",
         }));
 
       const isUrlASitemap = /sitemap.*\.xml$/.test(config.url);

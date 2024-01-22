@@ -22,6 +22,7 @@ app.post('/crawl', async (req: Request, res: Response) => {
         const config = {
             url,
             match,
+            // stayOnBaseUrl, // TODO instead of match
             maxPagesToCrawl,
             courseName,
             maxTokens,
