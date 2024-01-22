@@ -49,7 +49,7 @@ export async function ingestPdf(s3Key: string, courseName: string) {
         readable_filename: readableFilename,
       },
     });
-    console.log(`PDF ingested: ${response.data}`);
+    console.log(`PDF ingested:`, response.data);
   } catch (error) {
     console.error(`Error ingesting PDF: ${error}`);
   }

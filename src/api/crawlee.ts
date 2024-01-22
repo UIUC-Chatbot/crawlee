@@ -72,8 +72,9 @@ export async function crawl(config: Config) {
           // Extract links from the current page
           // and add them to the crawling queue.
           await enqueueLinks({
-            // strategy: 'all', // wander the internet -- https://crawlee.dev/docs/introduction/adding-urls#filtering-links-to-same-domain
-            strategy: 'same-domain', // stay on the same domain
+            strategy: config.stayOnBaseUrl ? 'same-domain' : 'all',
+            // strategy: 'all' == wander the internet -- https://crawlee.dev/docs/introduction/adding-urls#filtering-links-to-same-domain
+            // strategy: 'same-domain' ==  stay on the same domain
 
             // TODO: valid_filetypes = ['.html', '.py', '.vtt', '.pdf', '.txt', '.srt', '.docx', '.ppt', '.pptx']
             transformRequestFunction(req) {
