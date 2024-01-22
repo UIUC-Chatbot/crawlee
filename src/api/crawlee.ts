@@ -1,5 +1,5 @@
 // For more information, see https://crawlee.dev/
-import { Configuration, KeyValueStore, PlaywrightCrawler, downloadListOfUrls } from "crawlee";
+import { Configuration, PlaywrightCrawler, downloadListOfUrls } from "crawlee";
 import { Page } from "playwright";
 import axios from 'axios';
 // import { isWithinTokenLimit } from "gpt-tokenizer";
@@ -18,6 +18,7 @@ export async function crawl(config: Config) {
       // PlaywrightCrawler crawls the web using a headless
       // browser controlled by the Playwright library.
       const crawler = new PlaywrightCrawler({
+        // enqueueStrategy: "same-domain", // or 'all'
         // Use the requestHandler to process each of the crawled pages.
         async requestHandler({ request, page, enqueueLinks, log, pushData }) {
           console.log(`Crawling: ${request.loadedUrl}...`);
@@ -72,8 +73,10 @@ export async function crawl(config: Config) {
           // Extract links from the current page
           // and add them to the crawling queue.
           await enqueueLinks({
-            globs:
-              typeof config.match === "string" ? [config.match] : config.match,
+            // strategy: 'all', // wander the internet -- https://crawlee.dev/docs/introduction/adding-urls#filtering-links-to-same-domain
+            strategy: 'same-domain', // stay on the same domain
+
+            // TODO: valid_filetypes = ['.html', '.py', '.vtt', '.pdf', '.txt', '.srt', '.docx', '.ppt', '.pptx']
             transformRequestFunction(req) {
               // Download PDFs specially 
               if (req.url.endsWith('.pdf')) {
@@ -83,6 +86,8 @@ export async function crawl(config: Config) {
               }
               return req;
             },
+            // globs:  // DEPRECATED
+            //   typeof config.match === "string" ? [config.match] : config.match,
             exclude:
               typeof config.exclude === "string"
                 ? [config.exclude]
@@ -124,6 +129,7 @@ export async function crawl(config: Config) {
       },
         new Configuration({
           persistStorage: false,
+          EnqueueStrategy: config.enqueueStrategy ?? "same-domain",
         }));
 
       const isUrlASitemap = /sitemap.*\.xml$/.test(config.url);
