@@ -96,16 +96,20 @@ export async function crawl(config: Config) {
                   // Download PDFs specially 
                   console.log(`Downloading PDF: ${req.url}`);
                   handlePdf(req.url, config.courseName);
+                  return false;
                 }
-                return false;
+                return req;
               },
-
             })
           } else {
             // strategy: 'equal-and-below' == stay on the same domain and subdomains
             await enqueueLinks({
               globs:
                 typeof config.match === "string" ? [config.match] : config.match,
+              exclude:
+                typeof config.exclude === "string"
+                  ? [config.exclude]
+                  : config.exclude ?? [],
 
               // Keep this here so if we encounter .pdfs (no matter what URL or strategy), we still grab them
               transformRequestFunction(req) {
@@ -113,13 +117,10 @@ export async function crawl(config: Config) {
                   // Download PDFs specially 
                   console.log(`Downloading PDF: ${req.url}`);
                   handlePdf(req.url, config.courseName);
+                  return false;
                 }
-                return false;
+                return req;
               },
-              exclude:
-                typeof config.exclude === "string"
-                  ? [config.exclude]
-                  : config.exclude ?? [],
             });
           }
         },
