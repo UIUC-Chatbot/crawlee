@@ -105,10 +105,10 @@ export async function crawl(config: Config) {
               // transformRequestFunction(req) {
               //   return req;
               // },
-              // exclude:
-              //   typeof config.exclude === "string"
-              //     ? [config.exclude]
-              //     : config.exclude ?? [],
+              exclude:
+                typeof config.exclude === "string"
+                  ? [config.exclude]
+                  : config.exclude ?? [],
             });
           }
         },
