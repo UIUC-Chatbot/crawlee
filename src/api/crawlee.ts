@@ -9,8 +9,8 @@ import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
 
 export async function crawl(config: Config) {
   configSchema.parse(config);
-  const results: Array<{ title: string; url: string; html: string }> = [];
   let pageCounter = 0;
+  // const results: Array<{ title: string; url: string; html: string }> = [];
 
   if (config.url) {
     console.log(`Crawling URL: ${config.url}`);
@@ -41,58 +41,76 @@ export async function crawl(config: Config) {
               });
             }
           }
-          page.on('console', message => console.log(`Page log: ${message.text()}`));
+          // page.on('console', message => console.log(`Page log: ${message.text()}`)); // refactored for memory leaks
+          const consoleListener = (message: { text: () => any; }) => console.log(`Page log: ${message.text()}`);
+          page.on('console', consoleListener);
           const html = await getPageHtml(page, config.selector);
 
-          // Instead of pushing data to a file, add it to the results array
+          // Grab results from the page
           if (request.loadedUrl) {
-            results.push({ title, url: request.loadedUrl, html });
-            // Asynchronously call the ingestWebscrape endpoint without awaiting the result
-            // axios.post('http://localhost:8000/ingest-web-text', {
-            axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
-              base_url: config.url,
-              url: request.loadedUrl,
-              title: title,
-              content: html,
-              courseName: config.courseName,
-            }).then(() => {
-              console.log(`Data ingested for URL: ${request.loadedUrl}`);
-            }).catch(error => {
-              console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error);
-            });
+            // results.push({ title, url: request.loadedUrl, html });
+
+
+            // TODO: handle all file types (this is probably better than the transform function below)
+            // const validFiletypes = ['.html', '.py', '.vtt', '.pdf', '.txt', '.srt', '.docx', '.ppt', '.pptx']
+            // if (validFiletypes.some(ext => req.url.endsWith(ext))) {
+            //   // If URL is a file, send it to handleFile
+            //   handleFile(req.url, config.courseName);
+            //   return null; // Returning null will prevent the URL from being enqueued
+            // }
+
+            if (request.loadedUrl.endsWith('.pdf')) {
+              // Download PDFs specially 
+              console.log(`Downloading PDF: ${request.loadedUrl}`);
+              handlePdf(request.loadedUrl, config.courseName);
+            } else {
+              // Asynchronously call the ingestWebscrape endpoint without awaiting the result
+              axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
+                base_url: config.url,
+                url: request.loadedUrl,
+                title: title,
+                content: html,
+                courseName: config.courseName,
+              }).then(() => {
+                console.log(`Data ingested for URL: ${request.loadedUrl}`);
+              }).catch(error => {
+                console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error);
+              });
+            }
           } else {
             console.error('Error: URL is undefined. Title is: ', title);
           }
 
-
           if (config.onVisitPage) {
             await config.onVisitPage({ page, pushData });
           }
+          page.off('console', consoleListener); // remove listener to avoid memory leak
 
-          // Extract links from the current page
-          // and add them to the crawling queue.
-          await enqueueLinks({
-            strategy: config.stayOnBaseUrl ? 'same-domain' : 'all',
-            // strategy: 'all' == wander the internet -- https://crawlee.dev/docs/introduction/adding-urls#filtering-links-to-same-domain
-            // strategy: 'same-domain' ==  stay on the same domain
+          // Extract links from the current page and add them to the crawling queue.
+          // Docs https://crawlee.dev/docs/introduction/adding-urls#filtering-links-to-same-domain
+          // 1. scrape all -- wander the internet.
+          // 2. scrape domain and all subdomains.
+          // 3. scrape just equal and below the given URL -- match statement.
+          if (config.scrapeStrategy == 'all' || config.scrapeStrategy == 'same-domain') {
+            await enqueueLinks({
+              strategy: config.scrapeStrategy
+            })
+          } else {
+            // strategy: 'equal-and-below' == stay on the same domain and subdomains
+            await enqueueLinks({
+              globs:
+                typeof config.match === "string" ? [config.match] : config.match,
 
-            // TODO: valid_filetypes = ['.html', '.py', '.vtt', '.pdf', '.txt', '.srt', '.docx', '.ppt', '.pptx']
-            transformRequestFunction(req) {
-              // Download PDFs specially 
-              if (req.url.endsWith('.pdf')) {
-                console.log(`Downloading PDF: ${req.url}`);
-                handlePdf(req.url, config.courseName);
-                return false;
-              }
-              return req;
-            },
-            // globs:  // DEPRECATED
-            //   typeof config.match === "string" ? [config.match] : config.match,
-            exclude:
-              typeof config.exclude === "string"
-                ? [config.exclude]
-                : config.exclude ?? [],
-          });
+              // DEPRECATED
+              // transformRequestFunction(req) {
+              //   return req;
+              // },
+              // exclude:
+              //   typeof config.exclude === "string"
+              //     ? [config.exclude]
+              //     : config.exclude ?? [],
+            });
+          }
         },
         // Comment this option to scrape the full website.
         maxRequestsPerCrawl: config.maxPagesToCrawl,
@@ -150,7 +168,7 @@ export async function crawl(config: Config) {
       }
     }
   }
-  return results;
+  return pageCounter;
 }
 
 // ----- HELPERS -----

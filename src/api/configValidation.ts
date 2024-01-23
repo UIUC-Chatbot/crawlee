@@ -16,16 +16,23 @@ export const configSchema = z.object({
     url: z.string(),
     /**
      * Pattern to match against for links on a page to subsequently crawl
+     * match is ONLY required when scrapeStrategy == "equal-and-below"
      * @example "https://www.builder.io/c/docs/**"
      * @default ""
      */
     match: z.string().or(z.array(z.string())).optional(),
     /**
+     * Strategy to use when enqueueing URLs. Only allows 'all', 'same-domain', or 'equal-and-below'.
+     * @example "same-domain"
+     * @default "same-domain"
+     */
+    scrapeStrategy: z.enum(["all", "same-domain", "equal-and-below"]),
+    /**
      * If true use enqueueLinks strategy: 'same-domain', otherwise use strategy: 'all' which wanders the internet
      * @example "true"
      * @default true
      */
-    stayOnBaseUrl: z.boolean(),
+    // stayOnBaseUrl: z.boolean(),
     /**
      * Pattern to match against for links on a page to exclude from crawling
      * @example "https://www.builder.io/c/docs/**"
