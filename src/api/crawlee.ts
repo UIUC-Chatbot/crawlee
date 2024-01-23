@@ -100,7 +100,9 @@ export async function crawl(config: Config) {
             await enqueueLinks({
               globs:
                 typeof config.match === "string" ? [config.match] : config.match,
-              strategy: 'same-hostname',
+
+              // `http?(s)://${config.url.domain}` idk....
+              // strategy: 'same-hostname',
 
               // DEPRECATED
               // transformRequestFunction(req) {
