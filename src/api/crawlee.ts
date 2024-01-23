@@ -74,7 +74,7 @@ export async function crawl(config: Config) {
               }).then(() => {
                 console.log(`Data ingested for URL: ${request.loadedUrl}`);
               }).catch(error => {
-                console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error);
+                console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
               });
             }
           } else {
