@@ -52,6 +52,7 @@ export async function crawl(config: Config) {
 
 
             // TODO: handle all file types (this is probably better than the transform function below)
+            // TODO: NOOO Do it below instead, otherwise the match strategy never makes it here!!
             // const validFiletypes = ['.html', '.py', '.vtt', '.pdf', '.txt', '.srt', '.docx', '.ppt', '.pptx']
             // if (validFiletypes.some(ext => req.url.endsWith(ext))) {
             //   // If URL is a file, send it to handleFile
@@ -59,24 +60,18 @@ export async function crawl(config: Config) {
             //   return null; // Returning null will prevent the URL from being enqueued
             // }
 
-            if (request.loadedUrl.endsWith('.pdf')) {
-              // Download PDFs specially 
-              console.log(`Downloading PDF: ${request.loadedUrl}`);
-              handlePdf(request.loadedUrl, config.courseName);
-            } else {
-              // Asynchronously call the ingestWebscrape endpoint without awaiting the result
-              axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
-                base_url: config.url,
-                url: request.loadedUrl,
-                title: title,
-                content: html,
-                courseName: config.courseName,
-              }).then(() => {
-                console.log(`Data ingested for URL: ${request.loadedUrl}`);
-              }).catch(error => {
-                console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
-              });
-            }
+            // Asynchronously call the ingestWebscrape endpoint without awaiting the result
+            axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
+              base_url: config.url,
+              url: request.loadedUrl,
+              title: title,
+              content: html,
+              courseName: config.courseName,
+            }).then(() => {
+              console.log(`Data ingested for URL: ${request.loadedUrl}`);
+            }).catch(error => {
+              console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
+            });
           } else {
             console.error('Error: URL is undefined. Title is: ', title);
           }
@@ -93,7 +88,18 @@ export async function crawl(config: Config) {
           // 3. scrape just equal and below the given URL -- match statement.
           if (config.scrapeStrategy == 'all' || config.scrapeStrategy == 'same-domain') {
             await enqueueLinks({
-              strategy: config.scrapeStrategy
+              strategy: config.scrapeStrategy,
+
+              // Keep this here so if we encounter .pdfs (no matter what URL or strategy), we still grab them
+              transformRequestFunction(req) {
+                if (req.url.endsWith('.pdf')) {
+                  // Download PDFs specially 
+                  console.log(`Downloading PDF: ${req.url}`);
+                  handlePdf(req.url, config.courseName);
+                }
+                return false;
+              },
+
             })
           } else {
             // strategy: 'equal-and-below' == stay on the same domain and subdomains
@@ -101,13 +107,15 @@ export async function crawl(config: Config) {
               globs:
                 typeof config.match === "string" ? [config.match] : config.match,
 
-              // `http?(s)://${config.url.domain}` idk....
-              // strategy: 'same-hostname',
-
-              // DEPRECATED
-              // transformRequestFunction(req) {
-              //   return req;
-              // },
+              // Keep this here so if we encounter .pdfs (no matter what URL or strategy), we still grab them
+              transformRequestFunction(req) {
+                if (req.url.endsWith('.pdf')) {
+                  // Download PDFs specially 
+                  console.log(`Downloading PDF: ${req.url}`);
+                  handlePdf(req.url, config.courseName);
+                }
+                return false;
+              },
               exclude:
                 typeof config.exclude === "string"
                   ? [config.exclude]
