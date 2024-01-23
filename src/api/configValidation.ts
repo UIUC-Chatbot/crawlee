@@ -35,8 +35,8 @@ export const configSchema = z.object({
     // stayOnBaseUrl: z.boolean(),
     /**
      * Pattern to match against for links on a page to exclude from crawling
-     * @example "https://www.builder.io/c/docs/**"
-     * @default ""
+     * @example "https://linkedin.com/**"
+     * @default '["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"]'
      */
     exclude: z.string().or(z.array(z.string())).optional(),
     /**
