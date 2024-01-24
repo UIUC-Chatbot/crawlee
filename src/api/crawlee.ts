@@ -97,8 +97,9 @@ export async function crawl(config: Config) {
                   console.log(`Downloading PDF: ${req.url}`);
                   handlePdf(req.url, config.courseName);
                   return false;
+                } else {
+                  return req;
                 }
-                return req;
               },
             })
           } else {
@@ -118,8 +119,9 @@ export async function crawl(config: Config) {
                   console.log(`Downloading PDF: ${req.url}`);
                   handlePdf(req.url, config.courseName);
                   return false;
+                } else {
+                  return req;
                 }
-                return req;
               },
             });
           }
