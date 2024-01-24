@@ -86,7 +86,7 @@ export async function crawl(config: Config) {
           // 1. scrape all -- wander the internet.
           // 2. scrape domain and all subdomains.
           // 3. scrape just equal and below the given URL -- match statement.
-          if (config.scrapeStrategy == 'all' || config.scrapeStrategy == 'same-domain') {
+          if (config.scrapeStrategy == 'all' || config.scrapeStrategy == 'same-domain' || config.scrapeStrategy == 'same-hostname') {
             await enqueueLinks({
               strategy: config.scrapeStrategy,
 

@@ -26,7 +26,7 @@ export const configSchema = z.object({
      * @example "same-domain"
      * @default "same-domain"
      */
-    scrapeStrategy: z.enum(["all", "same-domain", "equal-and-below"]),
+    scrapeStrategy: z.enum(["all", "same-domain", "same-hostname", "equal-and-below"]),
     /**
      * If true use enqueueLinks strategy: 'same-domain', otherwise use strategy: 'all' which wanders the internet
      * @example "true"
@@ -36,7 +36,7 @@ export const configSchema = z.object({
     /**
      * Pattern to match against for links on a page to exclude from crawling
      * @example "https://linkedin.com/**"
-     * @default '["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"]'
+     * @default ["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"]
      */
     exclude: z.string().or(z.array(z.string())).optional(),
     /**
