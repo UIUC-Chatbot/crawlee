@@ -103,8 +103,9 @@ export async function crawl(config: Config) {
               },
             })
           } else {
-            // strategy: 'equal-and-below' == stay on the same domain and subdomains
+            // strategy: 'equal-and-below' == stay on the same domain and subdomains (aka. hostname)
             await enqueueLinks({
+              strategy: 'same-hostname',
               globs:
                 typeof config.match === "string" ? [config.match] : config.match,
               exclude:
