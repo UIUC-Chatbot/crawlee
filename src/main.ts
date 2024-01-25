@@ -26,6 +26,7 @@ app.post('/crawl', async (req: Request, res: Response) => {
             maxPagesToCrawl,
             courseName,
             maxTokens,
+            exclude: "", // use default
         };
 
         const results = await crawl(config);
