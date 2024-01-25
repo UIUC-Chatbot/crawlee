@@ -11,6 +11,7 @@ export async function crawl(config: Config) {
   configSchema.parse(config);
   console.log("Crawling with config:", config)
   let pageCounter = 0;
+  const ingestionPromises: Promise<any>[] = [];
   // const results: Array<{ title: string; url: string; html: string }> = [];
 
   if (config.url) {
@@ -62,17 +63,19 @@ export async function crawl(config: Config) {
             // }
 
             // Asynchronously call the ingestWebscrape endpoint without awaiting the result
-            axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
-              base_url: config.url,
-              url: request.loadedUrl,
-              title: title,
-              content: html,
-              courseName: config.courseName,
-            }).then(() => {
-              console.log(`Data ingested for URL: ${request.loadedUrl}`);
-            }).catch(error => {
-              console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
-            });
+            ingestionPromises.push(
+              axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
+                base_url: config.url,
+                url: request.loadedUrl,
+                title: title,
+                content: html,
+                courseName: config.courseName,
+              }).then(() => {
+                console.log(`Data ingested for URL: ${request.loadedUrl}`);
+              }).catch(error => {
+                console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
+              })
+            )
           } else {
             console.error('Error: URL is undefined. Title is: ', title);
           }
@@ -188,6 +191,8 @@ export async function crawl(config: Config) {
       }
     }
   }
+  // Before returning from the function, wait for all the ingestion promises to resolve
+  await Promise.all(ingestionPromises);
   return pageCounter;
 }
 
