@@ -89,6 +89,10 @@ export async function crawl(config: Config) {
           if (config.scrapeStrategy == 'all' || config.scrapeStrategy == 'same-domain' || config.scrapeStrategy == 'same-hostname') {
             await enqueueLinks({
               strategy: config.scrapeStrategy,
+              exclude:
+                typeof config.exclude === "string"
+                  ? [config.exclude]
+                  : config.exclude ?? [],
 
               // Keep this here so if we encounter .pdfs (no matter what URL or strategy), we still grab them
               transformRequestFunction(req) {
