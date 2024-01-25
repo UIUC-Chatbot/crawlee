@@ -38,7 +38,7 @@ export const configSchema = z.object({
      * @example "https://linkedin.com/**"
      * @default ["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"]
      */
-    exclude: z.string().or(z.array(z.string())).optional().default(["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"]),
+    exclude: z.string().or(z.array(z.string())).default(["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"]).optional(),
     /**
      * Selector to grab the inner text from
      * @example ".docs-builder-container"
