@@ -26,7 +26,7 @@ app.post('/crawl', async (req: Request, res: Response) => {
             maxPagesToCrawl,
             courseName,
             maxTokens,
-            // exclude: undefined, // use default
+            exclude: ["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"],
         };
 
         const results = await crawl(config);
