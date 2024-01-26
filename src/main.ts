@@ -2,7 +2,7 @@
 import express, { Request, Response } from 'express';
 import { crawl } from './api/crawlee.js';
 import cors from 'cors';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 import { clearProgressForScrape, getProgressForScrape } from './api/progressStore.js';
 
 
@@ -19,9 +19,9 @@ app.use(express.json());
 app.post('/crawl', async (req: Request, res: Response) => {
     console.log('in /crawl. req.body:', req.body)
     // TODO: Frontend should send the UUID to make fetching results easier.
-    const scrapeId = uuidv4(); // Generate a unique ID for this scrape session
+    // const scrapeId = uuidv4(); // Generate a unique ID for this scrape session
     try {
-        const { url, scrapeStrategy, match, maxPagesToCrawl, courseName, maxTokens } = req.body.params;
+        const { url, scrapeStrategy, match, maxPagesToCrawl, courseName, maxTokens, scrapeId } = req.body.params;
         console.log('in /crawl -- got variables :) url:', url, 'scrapeStrategy:', scrapeStrategy, 'match', match, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName)
 
         const config = {
@@ -40,6 +40,9 @@ app.post('/crawl', async (req: Request, res: Response) => {
         console.log(`Crawl completed successfully. Number of results: ${results}`);
         // res.status(200).json(results);
         res.status(200).json({ results, scrapeId });
+        if (scrapeId) {
+            clearProgressForScrape(scrapeId);
+        }
     } catch (error) {
         const e = error as Error;
         res.status(500).json({ error: 'An error occurred during the upload', errorTitle: e.name, errorMessage: e.message });
@@ -47,7 +50,6 @@ app.post('/crawl', async (req: Request, res: Response) => {
         if (global.gc) {
             global.gc();
         }
-        clearProgressForScrape(scrapeId);
     }
 });
 
@@ -66,15 +68,15 @@ app.listen(PORT, () => {
 // TODO finish frontend polling
 
 // Example using JavaScript setInterval
-const scrapeId = 'receivedScrapeIdFromServer'; // Replace with actual scrapeId from server response
-const progressCheckInterval = setInterval(() => {
-    fetch(`/progress/${scrapeId}`)
-        .then(response => response.json())
-        .then(data => {
-            updateProgressBar(data.progress); // Implement this function to update the UI
-            if (data.progress >= 100) {
-                clearInterval(progressCheckInterval); // Stop polling when complete
-            }
-        })
-        .catch(error => console.error('Error fetching progress:', error));
-}, 2000); // Poll every 2 seconds
+// const scrapeId = 'receivedScrapeIdFromServer'; // Replace with actual scrapeId from server response
+// const progressCheckInterval = setInterval(() => {
+//     fetch(`/progress/${scrapeId}`)
+//         .then(response => response.json())
+//         .then(data => {
+//             updateProgressBar(data.progress); // Implement this function to update the UI
+//             if (data.progress >= 100) {
+//                 clearInterval(progressCheckInterval); // Stop polling when complete
+//             }
+//         })
+//         .catch(error => console.error('Error fetching progress:', error));
+// }, 2000); // Poll every 2 seconds

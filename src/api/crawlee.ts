@@ -6,6 +6,7 @@ import axios from 'axios';
 
 import { Config, configSchema } from "./configValidation.js";
 import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
+import { setProgressForScrape } from "./progressStore.js";
 
 export async function crawl(config: Config & { scrapeId: string }) {
   configSchema.parse(config);
