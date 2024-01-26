@@ -7,12 +7,16 @@ import axios from 'axios';
 import { Config, configSchema } from "./configValidation.js";
 import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
 
-export async function crawl(config: Config) {
+export async function crawl(config: Config & { scrapeId: string }) {
   configSchema.parse(config);
   console.log("Crawling with config:", config)
   let pageCounter = 0;
   const ingestionPromises: Promise<any>[] = [];
   // const results: Array<{ title: string; url: string; html: string }> = [];
+
+  const updateProgress = (scrapeId: string, progress: number) => {
+    setProgressForScrape(scrapeId, progress);
+  };
 
   if (config.url) {
     console.log(`Crawling URL: ${config.url}`);
@@ -28,6 +32,7 @@ export async function crawl(config: Config) {
           log.info(
             `Crawling: Page ${pageCounter} / ${config.maxPagesToCrawl} - URL: ${request.loadedUrl}...`,
           );
+          updateProgress(config.scrapeId, (pageCounter / config.maxPagesToCrawl));
 
           // Use custom handling for XPath selector
           if (config.selector) {
