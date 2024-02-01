@@ -23,7 +23,7 @@ export async function crawl(config: Config) {
       // browser controlled by the Playwright library.
       const crawler = new PlaywrightCrawler({
         preNavigationHooks: [
-          async (crawlingContext, gotoOptions) => {
+          async (crawlingContext) => {
             const formattedCookies = cookies.map(cookie => ({
               name: cookie.name,
               value: cookie.value,
@@ -156,34 +156,34 @@ export async function crawl(config: Config) {
         maxRequestsPerCrawl: config.maxPagesToCrawl,
         // Uncomment this option to see the browser window.
         // headless: false,
-        preNavigationHooks: [
-          // Abort requests for certain resource types
-          async ({ request, page, log }) => {
-            // If there are no resource exclusions, return
-            const RESOURCE_EXCLUSTIONS = config.resourceExclusions ?? [];
-            if (RESOURCE_EXCLUSTIONS.length === 0) {
-              return;
-            }
-            if (config.cookie) {
-              const cookies = (
-                Array.isArray(config.cookie) ? config.cookie : [config.cookie]
-              ).map((cookie: { name: any; value: any; }) => {
-                return {
-                  name: cookie.name,
-                  value: cookie.value,
-                  url: request.loadedUrl,
-                };
-              });
-              await page.context().addCookies(cookies);
-            }
-            await page.route(`**\/*.{${RESOURCE_EXCLUSTIONS.join()}}`, (route) =>
-              route.abort("aborted"),
-            );
-            log.info(
-              `Aborting requests for as this is a resource excluded route`,
-            );
-          },
-        ],
+        // preNavigationHooks: [
+        //   // Abort requests for certain resource types
+        //   async ({ request, page, log }) => {
+        //     // If there are no resource exclusions, return
+        //     const RESOURCE_EXCLUSTIONS = config.resourceExclusions ?? [];
+        //     if (RESOURCE_EXCLUSTIONS.length === 0) {
+        //       return;
+        //     }
+        //     if (config.cookie) {
+        //       const cookies = (
+        //         Array.isArray(config.cookie) ? config.cookie : [config.cookie]
+        //       ).map((cookie: { name: any; value: any; }) => {
+        //         return {
+        //           name: cookie.name,
+        //           value: cookie.value,
+        //           url: request.loadedUrl,
+        //         };
+        //       });
+        //       await page.context().addCookies(cookies);
+        //     }
+        //     await page.route(`**\/*.{${RESOURCE_EXCLUSTIONS.join()}}`, (route) =>
+        //       route.abort("aborted"),
+        //     );
+        //     log.info(
+        //       `Aborting requests for as this is a resource excluded route`,
+        //     );
+        //   },
+        // ],
       },
         new Configuration({
           persistStorage: false,
