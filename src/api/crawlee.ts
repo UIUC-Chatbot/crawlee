@@ -3,6 +3,8 @@ import { Configuration, PlaywrightCrawler, downloadListOfUrls } from "crawlee";
 import { Page } from "playwright";
 import axios from 'axios';
 // import { isWithinTokenLimit } from "gpt-tokenizer";
+import cookies from './library_cookies.json' assert { type: "json" }
+
 
 import { Config, configSchema } from "./configValidation.js";
 import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
@@ -20,6 +22,21 @@ export async function crawl(config: Config) {
       // PlaywrightCrawler crawls the web using a headless
       // browser controlled by the Playwright library.
       const crawler = new PlaywrightCrawler({
+        preNavigationHooks: [
+          async (crawlingContext, gotoOptions) => {
+            const formattedCookies = cookies.map(cookie => ({
+              name: cookie.name,
+              value: cookie.value,
+              domain: cookie.domain,
+              path: cookie.path,
+              expires: cookie.expirationDate,
+              httpOnly: cookie.httpOnly,
+              secure: cookie.secure,
+              sameSite: cookie.sameSite as 'Strict' | 'Lax' | 'None', // Cast to the correct type
+            }));
+            await crawlingContext.page.context().addCookies(formattedCookies);
+          },
+        ],
         // Use the requestHandler to process each of the crawled pages.
         async requestHandler({ request, page, enqueueLinks, log, pushData }) {
           console.log(`Crawling: ${request.loadedUrl}...`);
