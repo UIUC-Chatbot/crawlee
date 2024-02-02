@@ -32,7 +32,7 @@ export async function crawl(config: Config) {
               expires: cookie.expirationDate,
               httpOnly: cookie.httpOnly,
               secure: cookie.secure,
-              sameSite: cookie.sameSite as 'Strict' | 'Lax' | 'None', // Cast to the correct type
+              sameSite: cookie.sameSite as 'Strict' | 'Lax' | 'None' || "None", // Cast to the correct type
             }));
             await crawlingContext.page.context().addCookies(formattedCookies);
           },
