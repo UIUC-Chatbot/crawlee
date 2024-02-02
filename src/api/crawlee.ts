@@ -199,11 +199,14 @@ export async function crawl(config: Config) {
 // ----- HELPERS -----
 
 async function handlePdf(url: string, courseName: string) {
-  const s3Key = await uploadPdfToS3(url, courseName);
-  await new Promise(resolve => setTimeout(resolve, 3000));
-  await ingestPdf(s3Key, courseName);
+  try {
+    const s3Key = await uploadPdfToS3(url, courseName);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    await ingestPdf(s3Key, courseName);
+  } catch (error) {
+    console.error(`Error in handlePDF: ${error}`);
+  }
 }
-
 function getPageHtml(page: Page, selector = "body") {
   return page.evaluate((selector) => {
     // Exclude header, footer, nav from scraping

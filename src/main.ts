@@ -3,6 +3,8 @@ import express, { Request, Response } from 'express';
 import { crawl } from './api/crawlee.js';
 import cors from 'cors';
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const app = express();
 
 // const corsOptions = {
