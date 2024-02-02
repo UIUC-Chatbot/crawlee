@@ -3,6 +3,8 @@ import { Configuration, PlaywrightCrawler, downloadListOfUrls } from "crawlee";
 import { Page } from "playwright";
 import axios from 'axios';
 // import { isWithinTokenLimit } from "gpt-tokenizer";
+import cookies from './library_cookies.json' assert { type: "json" }
+
 
 import { Config, configSchema } from "./configValidation.js";
 import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
@@ -20,6 +22,21 @@ export async function crawl(config: Config) {
       // PlaywrightCrawler crawls the web using a headless
       // browser controlled by the Playwright library.
       const crawler = new PlaywrightCrawler({
+        preNavigationHooks: [
+          async (crawlingContext) => {
+            const formattedCookies = cookies.map(cookie => ({
+              name: cookie.name,
+              value: cookie.value,
+              domain: cookie.domain,
+              path: cookie.path,
+              expires: cookie.expirationDate,
+              httpOnly: cookie.httpOnly,
+              secure: cookie.secure,
+              sameSite: cookie.sameSite as 'Strict' | 'Lax' | 'None' || "None", // Cast to the correct type
+            }));
+            await crawlingContext.page.context().addCookies(formattedCookies);
+          },
+        ],
         // Use the requestHandler to process each of the crawled pages.
         async requestHandler({ request, page, enqueueLinks, log, pushData }) {
           console.log(`Crawling: ${request.loadedUrl}...`);
@@ -139,34 +156,34 @@ export async function crawl(config: Config) {
         maxRequestsPerCrawl: config.maxPagesToCrawl,
         // Uncomment this option to see the browser window.
         // headless: false,
-        preNavigationHooks: [
-          // Abort requests for certain resource types
-          async ({ request, page, log }) => {
-            // If there are no resource exclusions, return
-            const RESOURCE_EXCLUSTIONS = config.resourceExclusions ?? [];
-            if (RESOURCE_EXCLUSTIONS.length === 0) {
-              return;
-            }
-            if (config.cookie) {
-              const cookies = (
-                Array.isArray(config.cookie) ? config.cookie : [config.cookie]
-              ).map((cookie: { name: any; value: any; }) => {
-                return {
-                  name: cookie.name,
-                  value: cookie.value,
-                  url: request.loadedUrl,
-                };
-              });
-              await page.context().addCookies(cookies);
-            }
-            await page.route(`**\/*.{${RESOURCE_EXCLUSTIONS.join()}}`, (route) =>
-              route.abort("aborted"),
-            );
-            log.info(
-              `Aborting requests for as this is a resource excluded route`,
-            );
-          },
-        ],
+        // preNavigationHooks: [
+        //   // Abort requests for certain resource types
+        //   async ({ request, page, log }) => {
+        //     // If there are no resource exclusions, return
+        //     const RESOURCE_EXCLUSTIONS = config.resourceExclusions ?? [];
+        //     if (RESOURCE_EXCLUSTIONS.length === 0) {
+        //       return;
+        //     }
+        //     if (config.cookie) {
+        //       const cookies = (
+        //         Array.isArray(config.cookie) ? config.cookie : [config.cookie]
+        //       ).map((cookie: { name: any; value: any; }) => {
+        //         return {
+        //           name: cookie.name,
+        //           value: cookie.value,
+        //           url: request.loadedUrl,
+        //         };
+        //       });
+        //       await page.context().addCookies(cookies);
+        //     }
+        //     await page.route(`**\/*.{${RESOURCE_EXCLUSTIONS.join()}}`, (route) =>
+        //       route.abort("aborted"),
+        //     );
+        //     log.info(
+        //       `Aborting requests for as this is a resource excluded route`,
+        //     );
+        //   },
+        // ],
       },
         new Configuration({
           persistStorage: false,
