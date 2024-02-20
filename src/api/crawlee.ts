@@ -67,19 +67,21 @@ export async function crawl(config: Config) {
             // }
 
             // Asynchronously call the ingestWebscrape endpoint without awaiting the result
-            ingestionPromises.push(
-              axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
-                base_url: config.url,
-                url: request.loadedUrl,
-                title: title,
-                content: html,
-                courseName: config.courseName,
-              }).then(() => {
-                console.log(`Data ingested for URL: ${request.loadedUrl}`);
-              }).catch(error => {
-                console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
-              })
-            )
+            if (html) {
+              ingestionPromises.push(
+                axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
+                  base_url: config.url,
+                  url: request.loadedUrl,
+                  title: title,
+                  content: html,
+                  courseName: config.courseName,
+                }).then(() => {
+                  console.log(`Data ingested for URL: ${request.loadedUrl}`);
+                }).catch(error => {
+                  console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
+                })
+              )
+            }
           } else {
             console.error('Error: URL is undefined. Title is: ', title);
           }
@@ -107,7 +109,7 @@ export async function crawl(config: Config) {
                 if (req.url.endsWith('.pdf')) {
                   // Download PDFs specially 
                   console.log(`Downloading PDF: ${req.url}`);
-                  handlePdf(req.url, config.courseName);
+                  handlePdf(config.courseName, config.url, req.url);
                   return false;
                 } else {
                   return req;
@@ -130,7 +132,7 @@ export async function crawl(config: Config) {
                 if (req.url.endsWith('.pdf')) {
                   // Download PDFs specially 
                   console.log(`Downloading PDF: ${req.url}`);
-                  handlePdf(req.url, config.courseName);
+                  handlePdf(config.courseName, config.url, req.url,);
                   return false;
                 } else {
                   return req;
@@ -202,11 +204,11 @@ export async function crawl(config: Config) {
 
 // ----- HELPERS -----
 
-async function handlePdf(url: string, courseName: string) {
+async function handlePdf(courseName: string, base_url: string, url: string) {
   try {
     const s3Key = await uploadPdfToS3(url, courseName);
     await new Promise(resolve => setTimeout(resolve, 3000));
-    await ingestPdf(s3Key, courseName);
+    await ingestPdf(s3Key, courseName, base_url, url);
   } catch (error) {
     console.error(`Error in handlePDF: ${error}`);
   }

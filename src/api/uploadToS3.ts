@@ -38,7 +38,7 @@ export async function uploadPdfToS3(url: string, courseName: string) {
   return s3Key;
 }
 
-export async function ingestPdf(s3Key: string, courseName: string) {
+export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string) {
   const ingestEndpoint = 'https://flask-production-751b.up.railway.app/ingest';
   const readableFilename = path.basename(s3Key);
   try {
@@ -47,6 +47,8 @@ export async function ingestPdf(s3Key: string, courseName: string) {
         course_name: courseName,
         s3_paths: s3Key,
         readable_filename: readableFilename,
+        url: url,
+        base_url: base_url,
       },
     });
     console.log(`PDF ingested:`, response.data);
