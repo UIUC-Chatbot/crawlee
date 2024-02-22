@@ -68,19 +68,50 @@ export async function crawl(config: Config) {
 
             // Asynchronously call the ingestWebscrape endpoint without awaiting the result
             if (html) {
-              ingestionPromises.push(
-                axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
+
+              // success_fail = ingester.ingest_single_web_text(course_name, base_url, url, content, title)
+
+              fetch("https://41kgx.apps.beam.cloud", {
+                "method": "POST",
+                "headers": {
+                  "Accept": "*/*",
+                  "Accept-Encoding": "gzip, deflate",
+                  "Authorization": "Basic NTdjMGEwNDgxNjNhOTlmODY2NGZmNmM1ZGRhNzA4Yjk6NTBiZDJiM2M2YjgwMWFmZjRjMmRmODk5ZDAzNTUwMjg=",
+                  "Content-Type": "application/json"
+                },
+                "body": JSON.stringify({
                   base_url: config.url,
                   url: request.loadedUrl,
-                  title: title,
+                  readable_filename: title,
                   content: html,
-                  courseName: config.courseName,
-                }).then(() => {
-                  console.log(`Data ingested for URL: ${request.loadedUrl}`);
-                }).catch(error => {
-                  console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
+                  course_name: config.courseName,
+                  // s3_paths: s3Key,
                 })
-              )
+              })
+                .then(response => response.text())
+                .then(text => {
+                  console.log(`In success case -- Data ingested for URL: ${request.loadedUrl}`);
+                  console.log(text)
+                })
+                .catch(err => console.error(err));
+
+
+
+              // ingestionPromises.push(
+              //   axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
+              //     base_url: config.url,
+              //     url: request.loadedUrl,
+              //     title: title,
+              //     content: html,
+              //     courseName: config.courseName,
+              //   }).then(() => {
+              //     console.log(`Data ingested for URL: ${request.loadedUrl}`);
+              //   }).catch(error => {
+              //     console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
+              //   })
+              // )
+
+
             }
           } else {
             console.error('Error: URL is undefined. Title is: ', title);

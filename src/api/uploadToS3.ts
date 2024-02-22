@@ -39,20 +39,45 @@ export async function uploadPdfToS3(url: string, courseName: string) {
 }
 
 export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string) {
-  const ingestEndpoint = 'https://flask-production-751b.up.railway.app/ingest';
-  const readableFilename = path.basename(s3Key);
-  try {
-    const response = await axios.get(ingestEndpoint, {
-      params: {
-        course_name: courseName,
-        s3_paths: s3Key,
-        readable_filename: readableFilename,
-        url: url,
-        base_url: base_url,
-      },
-    });
-    console.log(`PDF ingested:`, response.data);
-  } catch (error) {
-    console.error(`Error ingesting PDF: ${error}`);
-  }
+
+  fetch("https://41kgx.apps.beam.cloud", {
+    "method": "POST",
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Authorization": `Basic ${process.env.BEAM_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    "body": JSON.stringify({
+      base_url: base_url,
+      url: url,
+      readable_filename: path.basename(s3Key),
+      s3_paths: s3Key,
+      course_name: courseName,
+    })
+  })
+    .then(response => response.text())
+    .then(text => {
+      console.log(`In success case -- Data ingested for pdf: ${path.basename(s3Key)}`);
+      console.log(text)
+    })
+    .catch(err => console.error(err));
+
+
+  // const ingestEndpoint = 'https://flask-production-751b.up.railway.app/ingest';
+  // const readableFilename = path.basename(s3Key);
+  // try {
+  //   const response = await axios.get(ingestEndpoint, {
+  //     params: {
+  //       course_name: courseName,
+  //       s3_paths: s3Key,
+  //       readable_filename: readableFilename,
+  //       url: url,
+  //       base_url: base_url,
+  //     },
+  //   });
+  //   console.log(`PDF ingested:`, response.data);
+  // } catch (error) {
+  //   console.error(`Error ingesting PDF: ${error}`);
+  // }
 }
