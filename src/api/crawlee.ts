@@ -76,7 +76,7 @@ export async function crawl(config: Config) {
                 "headers": {
                   "Accept": "*/*",
                   "Accept-Encoding": "gzip, deflate",
-                  "Authorization": "Basic NTdjMGEwNDgxNjNhOTlmODY2NGZmNmM1ZGRhNzA4Yjk6NTBiZDJiM2M2YjgwMWFmZjRjMmRmODk5ZDAzNTUwMjg=",
+                  "Authorization": `Basic ${process.env.BEAM_API_KEY}`,
                   "Content-Type": "application/json"
                 },
                 "body": JSON.stringify({
