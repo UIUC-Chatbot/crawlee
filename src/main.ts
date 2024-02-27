@@ -18,8 +18,8 @@ app.use(express.json());
 app.post('/crawl', async (req: Request, res: Response) => {
     console.log('in /crawl. req.body:', req.body)
     try {
-        const { url, scrapeStrategy, match, maxPagesToCrawl, courseName, maxTokens } = req.body.params;
-        console.log('in /crawl -- got variables :) url:', url, 'scrapeStrategy:', scrapeStrategy, 'match', match, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName)
+        const { url, scrapeStrategy, match, maxPagesToCrawl, courseName, maxTokens, maxConcurrency, maxRequestsPerMinute } = req.body.params;
+        console.log('in /crawl -- got variables :) url:', url, 'scrapeStrategy:', scrapeStrategy, 'match', match, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName, 'maxConcurrency:', maxConcurrency, 'maxRequestsPerMinute:', maxRequestsPerMinute)
 
         const config = {
             url,
@@ -28,6 +28,8 @@ app.post('/crawl', async (req: Request, res: Response) => {
             maxPagesToCrawl,
             courseName,
             maxTokens,
+            maxConcurrency,
+            maxRequestsPerMinute,
             exclude: ["https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"],
         };
 
