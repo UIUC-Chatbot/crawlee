@@ -54,12 +54,12 @@ export const configSchema = z.object({
      * Let the crawler know it can run up to X requests concurrently at any time
      * @default 20
      */
-    maxConcurrency: z.number().int().positive(),
+    maxConcurrency: z.number().int().positive().default(20),
     /**
      * but also ensure the crawler never exceeds 250 requests per minute
      * @default 120
      */
-    maxRequestsPerMinute: z.number().int().positive(),
+    maxRequestsPerMinute: z.number().int().positive().default(120),
     /**
      * The name of the course to which these will be added.
      * @default ""
