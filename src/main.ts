@@ -19,7 +19,8 @@ app.post('/crawl', async (req: Request, res: Response) => {
     console.log('in /crawl. req.body:', req.body)
     try {
         const { url, scrapeStrategy, match, exclude, maxPagesToCrawl, courseName, maxTokens, maxConcurrency, maxRequestsPerMinute } = req.body.params;
-        console.log('in /crawl -- got variables :) url:', url, 'scrapeStrategy:', scrapeStrategy, 'match', match, 'exclude', exclude, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName, 'maxConcurrency:', maxConcurrency, 'maxRequestsPerMinute:', maxRequestsPerMinute)
+        console.log('Top of /crawl -- got variables :) url:', url, 'scrapeStrategy:', scrapeStrategy, 'match', match, 'exclude', exclude, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName, 'maxConcurrency:', maxConcurrency, 'maxRequestsPerMinute:', maxRequestsPerMinute)
+
 
         const config = {
             url,
@@ -32,6 +33,7 @@ app.post('/crawl', async (req: Request, res: Response) => {
             maxRequestsPerMinute,
             exclude: [...exclude, "https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"],
         };
+        console.log('Crawl after parsing variables: ', config);
 
         const results = await crawl(config);
         console.log(`Crawl completed successfully. Number of results: ${results}`);
