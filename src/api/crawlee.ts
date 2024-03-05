@@ -27,13 +27,10 @@ export async function crawl(rawConfig: Config) {
         crawler = new PlaywrightCrawler({
 
           // TODO: add these back... 
-          // maxConcurrency: config.maxConcurrency,
-          // maxRequestsPerMinute: config.maxRequestsPerMinute,
-          maxConcurrency: 4,
-          maxRequestsPerMinute: 120,
+          maxConcurrency: config.maxConcurrency,
+          maxRequestsPerMinute: config.maxRequestsPerMinute,
 
           // Use the requestHandler to process each of the crawled pages.
-
           // removed , pushData from params... weird try catch behavior
           async requestHandler({ request, page, enqueueLinks, log }) {
             console.log(`Crawling: ${request.loadedUrl}...`);
