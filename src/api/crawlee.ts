@@ -34,7 +34,8 @@ export async function crawl(rawConfig: Config) {
 
           // Use the requestHandler to process each of the crawled pages.
 
-          async requestHandler({ request, page, enqueueLinks, log, pushData }) {
+          // removed , pushData from params... weird try catch behavior
+          async requestHandler({ request, page, enqueueLinks, log }) {
             console.log(`Crawling: ${request.loadedUrl}...`);
             const title = await page.title();
             pageCounter++;
@@ -126,9 +127,11 @@ export async function crawl(rawConfig: Config) {
               console.error('Error: URL is undefined. Title is: ', title);
             }
 
-            if (config.onVisitPage) {
-              await config.onVisitPage({ page, pushData });
-            }
+            // Disabled this due to weird type error all of a sudden, after adding the try catch
+            // if (config.onVisitPage) {
+            //   await config.onVisitPage({ page, pushData });
+            // }
+
             page.off('console', consoleListener); // remove listener to avoid memory leak
 
             // Extract links from the current page and add them to the crawling queue.
