@@ -28,7 +28,7 @@
         "start:dev": "tsx src/main.ts",
         "build": "tsc",
         "test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1",
-        "postinstall": "npx crawlee install-playwright-browsers"
+        "postinstall": "npx crawlee install-playwright-browsers && npx playwright install --with-deps"
     },
     "author": "Kastan Day",
     "license": "MIT"
