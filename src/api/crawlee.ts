@@ -29,6 +29,8 @@ export async function crawl(rawConfig: Config) {
           // TODO: add these back... 
           // maxConcurrency: config.maxConcurrency,
           // maxRequestsPerMinute: config.maxRequestsPerMinute,
+          maxConcurrency: 4,
+          maxRequestsPerMinute: 120,
 
           // Use the requestHandler to process each of the crawled pages.
 
