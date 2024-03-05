@@ -8,10 +8,10 @@
         "@aws-sdk/s3-presigned-post": "^3.495.0",
         "axios": "^1.6.5",
         "cors": "^2.8.5",
-        "crawlee": "^3.0.0",
+        "crawlee": "^3.8.1",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
-        "playwright": "*",
+        "playwright": "^1.42.1",
         "zod": "^3.22.4"
     },
     "devDependencies": {
@@ -28,7 +28,7 @@
         "start:dev": "tsx src/main.ts",
         "build": "tsc",
         "test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1",
-        "postinstall": "npx crawlee install-playwright-browsers --with-deps"
+        "postinstall": "npx crawlee install-playwright-browsers"
     },
     "author": "Kastan Day",
     "license": "MIT"
