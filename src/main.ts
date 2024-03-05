@@ -31,21 +31,21 @@ app.post('/crawl', async (req: Request, res: Response) => {
         // const { url, scrapeStrategy, match, exclude, maxPagesToCrawl, courseName, maxTokens, maxConcurrency, maxRequestsPerMinute } = req.body.params;
         // console.log('Top of /crawl -- got variables :) url:', url, 'scrapeStrategy:', scrapeStrategy, 'match', match, 'exclude', exclude, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName, 'maxConcurrency:', maxConcurrency, 'maxRequestsPerMinute:', maxRequestsPerMinute)
 
-        const params = req.body.params;
-        const config = {
-            url: params.url,
-            scrapeStrategy: params.scrapeStrategy,
-            match: params.match,
-            exclude: params.exclude, //  "https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"
-            maxPagesToCrawl: params.maxPagesToCrawl,
-            courseName: params.courseName,
-            maxTokens: params.maxTokens,
-            // Use default values as specified in configSchema if undefined
-            maxConcurrency: params.maxConcurrency,
-            maxRequestsPerMinute: params.maxRequestsPerMinute,
-        };
+        // const params = req.body.params;
+        // const config = {
+        //     url: params.url,
+        //     scrapeStrategy: params.scrapeStrategy,
+        //     match: params.match,
+        //     exclude: params.exclude, //  "https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"
+        //     maxPagesToCrawl: params.maxPagesToCrawl,
+        //     courseName: params.courseName,
+        //     maxTokens: params.maxTokens,
+        //     // Use default values as specified in configSchema if undefined
+        //     maxConcurrency: params.maxConcurrency,
+        //     maxRequestsPerMinute: params.maxRequestsPerMinute,
+        // };
 
-        const results = await crawl(config);
+        const results = await crawl(req.body.params);
         console.log(`Crawl completed successfully. Number of results: ${results}`);
         res.status(200).json(`Crawl completed successfully. Number of results: ${results}`);
     } catch (error) {
