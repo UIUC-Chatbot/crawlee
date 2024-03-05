@@ -7,9 +7,11 @@ import axios from 'axios';
 import { Config, configSchema } from "./configValidation.js";
 import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
 
-export async function crawl(config: Config) {
-  configSchema.parse(config);
-  console.log("PARSED config:", config)
+export async function crawl(rawConfig: Config) {
+  console.log('Raw config: ', rawConfig);
+  const config = configSchema.parse(removeUndefinedFromObject(rawConfig));
+  console.log("PARSED, final config:", config)
+
   let pageCounter = 0;
   const ingestionPromises: Promise<any>[] = [];
   // const results: Array<{ title: string; url: string; html: string }> = [];
@@ -282,4 +284,13 @@ async function waitForXPath(page: Page, xpath: string, timeout: number) {
     xpath,
     { timeout },
   );
+}
+
+function removeUndefinedFromObject(obj: Record<string, any>) {
+  Object.keys(obj).forEach(key => {
+    if (obj[key] === undefined) {
+      delete obj[key];
+    }
+  });
+  return obj;
 }

@@ -32,7 +32,6 @@ app.post('/crawl', async (req: Request, res: Response) => {
         // console.log('Top of /crawl -- got variables :) url:', url, 'scrapeStrategy:', scrapeStrategy, 'match', match, 'exclude', exclude, 'maxPagesToCrawl:', maxPagesToCrawl, 'maxTokens:', maxTokens, 'courseName:', courseName, 'maxConcurrency:', maxConcurrency, 'maxRequestsPerMinute:', maxRequestsPerMinute)
 
         const params = req.body.params;
-
         const config = {
             url: params.url,
             scrapeStrategy: params.scrapeStrategy,
@@ -46,11 +45,9 @@ app.post('/crawl', async (req: Request, res: Response) => {
             maxRequestsPerMinute: params.maxRequestsPerMinute,
         };
 
-        console.log('Crawl after creating my defaults, before parsing: ', config);
-
         const results = await crawl(config);
         console.log(`Crawl completed successfully. Number of results: ${results}`);
-        res.status(200).json(results);
+        res.status(200).json(`Crawl completed successfully. Number of results: ${results}`);
     } catch (error) {
         const e = error as Error;
         res.status(500).json({ error: 'An error occurred during the upload', errorTitle: e.name, errorMessage: e.message });
