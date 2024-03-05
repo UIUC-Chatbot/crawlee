@@ -37,13 +37,13 @@ app.post('/crawl', async (req: Request, res: Response) => {
             url: params.url,
             scrapeStrategy: params.scrapeStrategy,
             match: params.match,
-            exclude: [...(params.exclude || []), "https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"],
+            exclude: params.exclude, //  "https://www.facebook.com/**", "https://youtube.com/**", "https://linkedin.com/**", "https://instagram.com/**"
             maxPagesToCrawl: params.maxPagesToCrawl,
             courseName: params.courseName,
             maxTokens: params.maxTokens,
             // Use default values as specified in configSchema if undefined
-            maxConcurrency: params.maxConcurrency || 20,
-            maxRequestsPerMinute: params.maxRequestsPerMinute || 120,
+            maxConcurrency: params.maxConcurrency,
+            maxRequestsPerMinute: params.maxRequestsPerMinute,
         };
 
         console.log('Crawl after creating my defaults, before parsing: ', config);
