@@ -9,7 +9,7 @@ import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
 
 export async function crawl(config: Config) {
   configSchema.parse(config);
-  console.log("Crawling with config:", config)
+  console.log("PARSED config:", config)
   let pageCounter = 0;
   const ingestionPromises: Promise<any>[] = [];
   // const results: Array<{ title: string; url: string; html: string }> = [];
