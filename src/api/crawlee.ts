@@ -22,8 +22,11 @@ export async function crawl(rawConfig: Config) {
       // PlaywrightCrawler crawls the web using a headless
       // browser controlled by the Playwright library.
       const crawler = new PlaywrightCrawler({
-        maxConcurrency: config.maxConcurrency,
-        maxRequestsPerMinute: config.maxRequestsPerMinute,
+
+        // TODO: add these back... 
+        // maxConcurrency: config.maxConcurrency,
+        // maxRequestsPerMinute: config.maxRequestsPerMinute,
+
         // Use the requestHandler to process each of the crawled pages.
         async requestHandler({ request, page, enqueueLinks, log, pushData }) {
           console.log(`Crawling: ${request.loadedUrl}...`);
