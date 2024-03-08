@@ -2,7 +2,8 @@
 import * as path from 'path';
 import axios from 'axios';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
+// import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
+import sanitize from 'sanitize-filename'
 
 export const aws_config = {
   bucketName: process.env.S3_BUCKET_NAME,
@@ -13,8 +14,8 @@ export const aws_config = {
 
 // Upload PDF to S3 and send the S3 path to the ingest function
 export async function uploadPdfToS3(url: string, courseName: string) {
-  console.log(`Uploading PDF to S3: ${url}`);
-  const filename = path.basename(url);
+  const filename = sanitize(path.basename(url));
+  console.log(`Uploading PDF to S3. Filename: ${filename}, Url: ${url}`);
   const s3Client = new S3Client({
     region: aws_config.region,
     credentials: {
