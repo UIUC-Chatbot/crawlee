@@ -13,8 +13,10 @@ export const aws_config = {
 // Upload PDF to S3 and send the S3 path to the ingest function
 export async function uploadPdfToS3(url: string, courseName: string) {
   // Sanitize filename
-  const humanURI = decodeURI(path.basename(url))
-  const filename = humanURI.replace(/[^a-zA-Z0-9]/g, '-')
+  const humanURI = decodeURI(path.basename(url));
+  const extension = path.extname(humanURI);
+  const nameWithoutExtension = path.basename(humanURI, extension);
+  const filename = nameWithoutExtension.replace(/[^a-zA-Z0-9]/g, '-') + extension;
 
   console.log(`Uploading PDF to S3. Filename: ${filename}, Url: ${url}`);
   const s3Client = new S3Client({
