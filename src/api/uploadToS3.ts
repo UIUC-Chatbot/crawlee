@@ -44,7 +44,7 @@ export async function uploadPdfToS3(url: string, courseName: string) {
 
 export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string) {
 
-  fetch("https://41kgx.apps.beam.cloud", {
+  fetch("https://app.beam.cloud/taskqueue/ingest_task_queue/latest", {
     "method": "POST",
     "headers": {
       "Accept": "*/*",

@@ -78,7 +78,7 @@ export async function crawl(rawConfig: Config) {
 
                 // success_fail = ingester.ingest_single_web_text(course_name, base_url, url, content, title)
 
-                fetch("https://41kgx.apps.beam.cloud", {
+                fetch("https://app.beam.cloud/taskqueue/ingest_task_queue/latest", {
                   "method": "POST",
                   "headers": {
                     "Accept": "*/*",
