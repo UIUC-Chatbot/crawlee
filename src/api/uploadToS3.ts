@@ -49,7 +49,7 @@ export async function ingestPdf(s3Key: string, courseName: string, base_url: str
     "headers": {
       "Accept": "*/*",
       "Accept-Encoding": "gzip, deflate",
-      "Authorization": `Basic ${process.env.BEAM_API_KEY}`,
+      "Authorization": `Bearer ${process.env.BEAM_API_KEY}`,
       "Content-Type": "application/json"
     },
     "body": JSON.stringify({
@@ -61,10 +61,10 @@ export async function ingestPdf(s3Key: string, courseName: string, base_url: str
     })
   })
     .then(response => response.text())
-    .then(text => {
-      console.log(`IN PDF success case -- Data ingested for pdf: ${path.basename(s3Key)}`);
-      console.log(text)
-    })
+    // .then(text => {
+    //   console.log(`IN PDF success case -- Data ingested for pdf: ${path.basename(s3Key)}`);
+    //   console.log(text)
+    // })
     .catch(err => console.error(err));
 
 
