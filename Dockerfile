@@ -21,14 +21,6 @@ RUN npm run build
 # Create final image
 FROM apify/actor-node-playwright-chrome:18
 
-# Install Playwright and browser
-USER root
-RUN npm init -y && \
-    npm install playwright && \
-    npx playwright install chromium && \
-    npx playwright install-deps chromium
-USER myuser
-
 # Copy only built JS files from builder image
 COPY --from=builder --chown=myuser /home/myuser/dist ./dist
 
@@ -46,7 +38,9 @@ RUN npm --quiet set progress=false \
     && echo "Node.js version:" \
     && node --version \
     && echo "NPM version:" \
-    && npm --version
+    && npm --version \ 
+    && echo "Installing browser:" \
+    && npx playwright install --with-deps 
 
 # Next, copy the remaining files and directories with the source code.
 # Since we do this after NPM install, quick build will be really fast
