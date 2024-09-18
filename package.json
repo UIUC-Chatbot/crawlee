@@ -1,6 +1,6 @@
 {
     "name": "crawlee-uiuc-dot-chat",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "type": "module",
     "description": "Using Crawlee to power UIUC.chat.",
     "dependencies": {
