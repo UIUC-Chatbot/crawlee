@@ -21,9 +21,12 @@ RUN npm run build
 # Create final image
 FROM apify/actor-node-playwright-chrome:18
 
-# Install Playwright dependencies
+# Install Playwright and browser
 USER root
-RUN npx playwright install-deps chromium
+RUN npm init -y && \
+    npm install playwright && \
+    npx playwright install chromium && \
+    npx playwright install-deps chromium
 USER myuser
 
 # Copy only built JS files from builder image
