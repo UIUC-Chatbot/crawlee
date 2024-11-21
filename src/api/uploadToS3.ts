@@ -66,18 +66,54 @@ export async function uploadPdfToS3(url: string, courseName: string) {
   const response = await axios.get(url, { responseType: 'arraybuffer' });
   const pdfBuffer = response.data;
 
-  await s3Client.send(new PutObjectCommand({
-    Bucket: s3BucketName,
-    Key: s3Key,
-    Body: pdfBuffer,
-  }));
+  try {
+    await s3Client.send(new PutObjectCommand({
+      Bucket: s3BucketName,
+      Key: s3Key,
+      Body: pdfBuffer,
+    }));
+    console.log(`PDF uploaded to S3 at key: ${s3Key}`);
+  } catch (error) {
+    if (error instanceof Error && error.name === 'NoSuchBucket') {
+      console.log(`Bucket ${s3BucketName} does not exist. Creating bucket.`);
+      try {
+        await s3Client.send(new CreateBucketCommand({ Bucket: s3BucketName }));
+        console.log(`Bucket ${s3BucketName} created.`);
+        // Retry the upload after creating the bucket
+        await s3Client.send(new PutObjectCommand({
+          Bucket: s3BucketName,
+          Key: s3Key,
+          Body: pdfBuffer,
+        }));
+        console.log(`PDF uploaded to S3 at key: ${s3Key}`);
+      } catch (createError) {
+        if (createError instanceof Error && createError.name === 'BucketAlreadyOwnedByYou') {
+          console.log(`Bucket ${s3BucketName} already owned by you.`);
+          // Retry the upload after confirming the bucket is owned by you
+          await s3Client.send(new PutObjectCommand({
+            Bucket: s3BucketName,
+            Key: s3Key,
+            Body: pdfBuffer,
+          }));
+          console.log(`PDF uploaded to S3 at key: ${s3Key}`);
+        } else {
+          throw createError;
+        }
+      }
+    } else {
+      throw error;
+    }
+  }
 
-  console.log(`PDF uploaded to S3 at key: ${s3Key}`);
   return s3Key;
 }
 
 export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string) {
-  const ingestUrl = process.env.INGEST_URL || "https://app.beam.cloud/taskqueue/ingest_task_queue/latest";
+  const ingestUrl = process.env.INGEST_URL;
+  if (!ingestUrl) {
+    console.error('Error: INGEST_URL environment variable is not defined.');
+    return;
+  }
 
   try {
     fetch(ingestUrl, {
