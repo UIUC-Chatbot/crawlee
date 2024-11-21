@@ -19,13 +19,27 @@ export async function uploadPdfToS3(url: string, courseName: string) {
   const filename = nameWithoutExtension.replace(/[^a-zA-Z0-9]/g, '-') + extension;
 
   console.log(`Uploading PDF to S3. Filename: ${filename}, Url: ${url}`);
+  // const s3Client = new S3Client({
+  //   region: aws_config.region,
+  //   credentials: {
+  //     accessKeyId: aws_config.accessKeyId as string,
+  //     secretAccessKey: aws_config.secretAccessKey as string,
+  //   },
+  // });
   const s3Client = new S3Client({
-    region: aws_config.region,
+    region: process.env.AWS_REGION,
     credentials: {
-      accessKeyId: aws_config.accessKeyId as string,
-      secretAccessKey: aws_config.secretAccessKey as string,
+      accessKeyId: process.env.AWS_KEY as string,
+      secretAccessKey: process.env.AWS_SECRET as string,
     },
-  });
+    // If MINIO_ENDPOINT is defined, use it instead of AWS S3.
+    ...(process.env.MINIO_ENDPOINT
+      ? {
+          endpoint: process.env.MINIO_ENDPOINT,
+          forcePathStyle: true,
+        }
+      : {}),
+  })
   const s3BucketName = aws_config.bucketName;
   const s3Key = `courses/${courseName}/${filename}`;
 
@@ -43,8 +57,9 @@ export async function uploadPdfToS3(url: string, courseName: string) {
 }
 
 export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string) {
+  const ingestUrl = process.env.INGEST_URL || "https://app.beam.cloud/taskqueue/ingest_task_queue/latest";
 
-  fetch("https://app.beam.cloud/taskqueue/ingest_task_queue/latest", {
+  fetch(ingestUrl, {
     "method": "POST",
     "headers": {
       "Accept": "*/*",
@@ -66,22 +81,4 @@ export async function ingestPdf(s3Key: string, courseName: string, base_url: str
     //   console.log(text)
     // })
     .catch(err => console.error(err));
-
-
-  // const ingestEndpoint = 'https://flask-production-751b.up.railway.app/ingest';
-  // const readableFilename = path.basename(s3Key);
-  // try {
-  //   const response = await axios.get(ingestEndpoint, {
-  //     params: {
-  //       course_name: courseName,
-  //       s3_paths: s3Key,
-  //       readable_filename: readableFilename,
-  //       url: url,
-  //       base_url: base_url,
-  //     },
-  //   });
-  //   console.log(`PDF ingested:`, response.data);
-  // } catch (error) {
-  //   console.error(`Error ingesting PDF: ${error}`);
-  // }
 }
