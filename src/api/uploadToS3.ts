@@ -40,10 +40,22 @@ export async function uploadPdfToS3(url: string, courseName: string) {
     await s3Client.send(new HeadBucketCommand({ Bucket: s3BucketName }));
     console.log(`Bucket ${s3BucketName} already exists.`);
   } catch (error) {
-    if (error instanceof Error && error.name === 'NotFound') {
-      console.log(`Bucket ${s3BucketName} does not exist. Creating bucket.`);
-      await s3Client.send(new CreateBucketCommand({ Bucket: s3BucketName }));
-      console.log(`Bucket ${s3BucketName} created.`);
+    if (error instanceof Error) {
+      if (error.name === 'NotFound') {
+        console.log(`Bucket ${s3BucketName} does not exist. Creating bucket.`);
+        try {
+          await s3Client.send(new CreateBucketCommand({ Bucket: s3BucketName }));
+          console.log(`Bucket ${s3BucketName} created.`);
+        } catch (createError) {
+          if (createError instanceof Error && createError.name === 'BucketAlreadyOwnedByYou') {
+            console.log(`Bucket ${s3BucketName} already owned by you.`);
+          } else {
+            throw createError;
+          }
+        }
+      } else {
+        throw error;
+      }
     } else {
       throw error;
     }
