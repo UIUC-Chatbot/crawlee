@@ -75,10 +75,9 @@ export async function crawl(rawConfig: Config) {
 
               // Asynchronously call the ingestWebscrape endpoint without awaiting the result
               if (html) {
+                const ingestUrl = process.env.INGEST_URL || "https://app.beam.cloud/taskqueue/ingest_task_queue/latest";
 
-                // success_fail = ingester.ingest_single_web_text(course_name, base_url, url, content, title)
-
-                fetch("https://app.beam.cloud/taskqueue/ingest_task_queue/latest", {
+                fetch(ingestUrl, {
                   "method": "POST",
                   "headers": {
                     "Accept": "*/*",
@@ -102,8 +101,6 @@ export async function crawl(rawConfig: Config) {
                   // })
                   .catch(err => console.error(err));
 
-
-
                 // ingestionPromises.push(
                 //   axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
                 //     base_url: config.url,
@@ -117,11 +114,9 @@ export async function crawl(rawConfig: Config) {
                 //     console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
                 //   })
                 // )
-
-
+              } else {
+                console.error('Error: URL is undefined. Title is: ', title);
               }
-            } else {
-              console.error('Error: URL is undefined. Title is: ', title);
             }
 
             // Disabled this due to weird type error all of a sudden, after adding the try catch
