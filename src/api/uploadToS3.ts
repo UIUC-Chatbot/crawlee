@@ -1,7 +1,7 @@
 // upload.ts
 import * as path from 'path';
 import axios from 'axios';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, HeadBucketCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
 
 export const aws_config = {
   bucketName: process.env.S3_BUCKET_NAME,
@@ -19,13 +19,6 @@ export async function uploadPdfToS3(url: string, courseName: string) {
   const filename = nameWithoutExtension.replace(/[^a-zA-Z0-9]/g, '-') + extension;
 
   console.log(`Uploading PDF to S3. Filename: ${filename}, Url: ${url}`);
-  // const s3Client = new S3Client({
-  //   region: aws_config.region,
-  //   credentials: {
-  //     accessKeyId: aws_config.accessKeyId as string,
-  //     secretAccessKey: aws_config.secretAccessKey as string,
-  //   },
-  // });
   const s3Client = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
@@ -41,6 +34,21 @@ export async function uploadPdfToS3(url: string, courseName: string) {
       : {}),
   })
   const s3BucketName = aws_config.bucketName;
+
+  // Check if the bucket exists, and create it if it does not
+  try {
+    await s3Client.send(new HeadBucketCommand({ Bucket: s3BucketName }));
+    console.log(`Bucket ${s3BucketName} already exists.`);
+  } catch (error) {
+    if (error instanceof Error && error.name === 'NotFound') {
+      console.log(`Bucket ${s3BucketName} does not exist. Creating bucket.`);
+      await s3Client.send(new CreateBucketCommand({ Bucket: s3BucketName }));
+      console.log(`Bucket ${s3BucketName} created.`);
+    } else {
+      throw error;
+    }
+  }
+
   const s3Key = `courses/${courseName}/${filename}`;
 
   const response = await axios.get(url, { responseType: 'arraybuffer' });
@@ -59,26 +67,36 @@ export async function uploadPdfToS3(url: string, courseName: string) {
 export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string) {
   const ingestUrl = process.env.INGEST_URL || "https://app.beam.cloud/taskqueue/ingest_task_queue/latest";
 
-  fetch(ingestUrl, {
-    "method": "POST",
-    "headers": {
-      "Accept": "*/*",
-      "Accept-Encoding": "gzip, deflate",
-      "Authorization": `Bearer ${process.env.BEAM_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    "body": JSON.stringify({
-      base_url: base_url,
-      url: url,
-      readable_filename: path.basename(s3Key),
-      s3_paths: s3Key,
-      course_name: courseName,
+  try {
+    fetch(ingestUrl, {
+      "method": "POST",
+      "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate",
+        "Authorization": `Bearer ${process.env.BEAM_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      "body": JSON.stringify({
+        base_url: base_url,
+        url: url,
+        readable_filename: path.basename(s3Key),
+        s3_paths: s3Key,
+        course_name: courseName,
+      })
     })
-  })
-    .then(response => response.text())
-    // .then(text => {
-    //   console.log(`IN PDF success case -- Data ingested for pdf: ${path.basename(s3Key)}`);
-    //   console.log(text)
-    // })
-    .catch(err => console.error(err));
+      .then(response => response.text())
+      // .then(text => {
+      //   console.log(`IN PDF success case -- Data ingested for pdf: ${path.basename(s3Key)}`);
+      //   console.log(text)
+      // })
+      .catch(err => console.error(err));
+  } catch (error) {
+    if (error instanceof Error) {
+      // Now TypeScript knows 'error' is of type 'Error'
+      console.error('Error message:', error.message);
+    } else {
+      // Handle other types of errors (if any)
+      console.error('Unknown error:', error);
+    }
+  }
 }
