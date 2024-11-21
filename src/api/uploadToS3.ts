@@ -5,7 +5,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 export const aws_config = {
   bucketName: process.env.S3_BUCKET_NAME,
-  region: 'us-east-1',
+  region: process.env.AWS_REGION,
   accessKeyId: process.env.AWS_KEY,
   secretAccessKey: process.env.AWS_SECRET,
 };
