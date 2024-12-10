@@ -108,7 +108,7 @@ export async function uploadPdfToS3(url: string, courseName: string) {
   return s3Key;
 }
 
-export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string) {
+export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string, documentGroups: string[]) {
   const ingestUrl = process.env.INGEST_URL;
   if (!ingestUrl) {
     console.error('Error: INGEST_URL environment variable is not defined.');
@@ -130,6 +130,7 @@ export async function ingestPdf(s3Key: string, courseName: string, base_url: str
         readable_filename: path.basename(s3Key),
         s3_paths: s3Key,
         course_name: courseName,
+        groups: documentGroups,
       })
     })
       .then(response => response.text())

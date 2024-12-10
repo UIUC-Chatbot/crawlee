@@ -96,6 +96,7 @@ export async function crawl(rawConfig: Config) {
                     readable_filename: title,
                     content: html,
                     course_name: config.courseName,
+                    groups: config.documentGroups,
                     // s3_paths: s3Key,
                   })
                 })
@@ -149,7 +150,7 @@ export async function crawl(rawConfig: Config) {
                   if (req.url.endsWith('.pdf')) {
                     // Download PDFs specially 
                     console.log(`Downloading PDF: ${req.url}`);
-                    handlePdf(config.courseName, config.url, req.url);
+                    handlePdf(config.courseName, config.url, req.url, config.documentGroups);
                     return false;
                   } else {
                     return req;
@@ -172,7 +173,7 @@ export async function crawl(rawConfig: Config) {
                   if (req.url.endsWith('.pdf')) {
                     // Download PDFs specially 
                     console.log(`Downloading PDF: ${req.url}`);
-                    handlePdf(config.courseName, config.url, req.url,);
+                    handlePdf(config.courseName, config.url, req.url, config.documentGroups);
                     return false;
                   } else {
                     return req;
@@ -249,11 +250,11 @@ export async function crawl(rawConfig: Config) {
 
 // ----- HELPERS -----
 
-async function handlePdf(courseName: string, base_url: string, url: string) {
+async function handlePdf(courseName: string, base_url: string, url: string, documentGroups: string[]) {
   try {
     const s3Key = await uploadPdfToS3(url, courseName);
     await new Promise(resolve => setTimeout(resolve, 3000));
-    await ingestPdf(s3Key, courseName, base_url, url);
+    await ingestPdf(s3Key, courseName, base_url, url, documentGroups);
   } catch (error) {
     console.error(`Error in handlePDF: ${error}`);
   }
