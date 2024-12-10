@@ -108,6 +108,12 @@ export const configSchema = z.object({
      * @example 5000
      */
     maxTokens: z.number().int().positive().optional(),
+    /**
+     * Groups of documents to be processed
+     * @example ["group1", "group2"]
+     * @default []
+     */
+    documentGroups: z.array(z.string()).optional().default([]),
 });
 
 export type Config = z.infer<typeof configSchema>;
