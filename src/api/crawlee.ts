@@ -96,7 +96,7 @@ export async function crawl(rawConfig: Config) {
                     readable_filename: title,
                     content: html,
                     course_name: config.courseName,
-                    doc_groups: config.documentGroups,
+                    groups: config.documentGroups,
                     // s3_paths: s3Key,
                   })
                 })
