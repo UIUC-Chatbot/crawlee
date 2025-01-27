@@ -6,6 +6,7 @@ import axios from 'axios';
 
 import { Config, configSchema } from "./configValidation.js";
 import { ingestPdf, uploadPdfToS3 } from "./uploadToS3.js";
+import { supabase } from "../utils/supabaseClient.js";
 
 export async function crawl(rawConfig: Config) {
   const config = configSchema.parse(removeUndefinedFromObject(rawConfig));
@@ -82,6 +83,20 @@ export async function crawl(rawConfig: Config) {
                   return;
                 }
 
+                const { error } = await supabase.from('documents_in_progress').insert({
+                  base_url: config.url,
+                  url: request.loadedUrl,
+                  readable_filename: title,
+                  content: html,
+                  course_name: config.courseName,
+                  groups: config.documentGroups,
+                })
+
+                if (error) {
+                  console.error(
+                    '❌❌ Supabase failed to insert into `documents_in_progress`:',
+                    error,)
+                }
                 fetch(ingestUrl, {
                   "method": "POST",
                   "headers": {
