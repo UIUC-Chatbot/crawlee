@@ -89,7 +89,7 @@ export async function crawl(rawConfig: Config) {
                   readable_filename: title,
                   content: html,
                   course_name: config.courseName,
-                  groups: config.documentGroups,
+                  doc_groups: config.documentGroups,
                 })
 
                 if (error) {

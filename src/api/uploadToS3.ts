@@ -123,7 +123,7 @@ export async function ingestPdf(s3Key: string, courseName: string, base_url: str
       readable_filename: path.basename(s3Key),
       s3_paths: s3Key,
       course_name: courseName,
-      groups: documentGroups,
+      doc_groups: documentGroups,
     })
 
     if (error) {
