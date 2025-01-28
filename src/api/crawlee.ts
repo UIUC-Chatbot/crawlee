@@ -87,7 +87,7 @@ export async function crawl(rawConfig: Config) {
                   base_url: config.url,
                   url: request.loadedUrl,
                   readable_filename: title,
-                  content: html,
+                  contexts: html,
                   course_name: config.courseName,
                   doc_groups: config.documentGroups,
                 })
