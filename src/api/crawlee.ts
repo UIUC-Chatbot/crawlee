@@ -13,6 +13,7 @@ export async function crawl(rawConfig: Config) {
 
   let pageCounter = 0;
   const ingestionPromises: Promise<any>[] = [];
+  const crawledUrls: string[] = []; // New array to store URLs
   // const results: Array<{ title: string; url: string; html: string }> = [];
 
   if (config.url) {
@@ -35,33 +36,35 @@ export async function crawl(rawConfig: Config) {
           async requestHandler({ request, page, enqueueLinks, log }) {
             console.log(`Crawling: ${request.loadedUrl}...`);
             const title = await page.title();
+            console.log(`Found URL: ${request.loadedUrl}`);
             pageCounter++;
             log.info(
               `Crawling: Page ${pageCounter} / ${config.maxPagesToCrawl} - URL: ${request.loadedUrl}...`,
             );
 
-            // Use custom handling for XPath selector
-            if (config.selector) {
-              if (config.selector.startsWith("/")) {
-                await waitForXPath(
-                  page,
-                  config.selector,
-                  config.waitForSelectorTimeout ?? 1000,
-                );
-              } else {
-                await page.waitForSelector(config.selector, {
-                  timeout: config.waitForSelectorTimeout ?? 1000,
-                });
-              }
-            }
+            // // Use custom handling for XPath selector
+            // if (config.selector) {
+            //   if (config.selector.startsWith("/")) {
+            //     await waitForXPath(
+            //       page,
+            //       config.selector,
+            //       config.waitForSelectorTimeout ?? 1000,
+            //     );
+            //   } else {
+            //     await page.waitForSelector(config.selector, {
+            //       timeout: config.waitForSelectorTimeout ?? 1000,
+            //     });
+            //   }
+            // }
             // page.on('console', message => console.log(`Page log: ${message.text()}`)); // refactored for memory leaks
-            const consoleListener = (message: { text: () => any; }) => console.log(`Page log: ${message.text()}`);
-            page.on('console', consoleListener);
-            const html = await getPageHtml(page, config.selector);
+            // const consoleListener = (message: { text: () => any; }) => console.log(`Page log: ${message.text()}`);
+            // page.on('console', consoleListener);
+            // const html = await getPageHtml(page, config.selector);
 
             // Grab results from the page
             if (request.loadedUrl) {
               // results.push({ title, url: request.loadedUrl, html });
+              crawledUrls.push(request.loadedUrl);
 
 
               // TODO: handle all file types (this is probably better than the transform function below)
@@ -73,56 +76,66 @@ export async function crawl(rawConfig: Config) {
               //   return null; // Returning null will prevent the URL from being enqueued
               // }
 
-              // Asynchronously call the ingestWebscrape endpoint without awaiting the result
-              if (html) {
-                const ingestUrl = process.env.INGEST_URL;
+              // // Asynchronously call the ingestWebscrape endpoint without awaiting the result
+              // if (html) {
 
-                if (!ingestUrl) {
-                  console.error('Error: INGEST_URL environment variable is not defined.');
-                  return;
-                }
+              //   console.log('Would have ingested:', {
+              //     base_url: config.url,
+              //     url: request.loadedUrl,
+              //     readable_filename: title,
+              //     content: html.substring(0, 100) + '...', // Log just the first 100 chars
+              //     course_name: config.courseName,
+              //     groups: config.documentGroups,
+              //   });
+              //   const ingestUrl = process.env.INGEST_URL;
 
-                fetch(ingestUrl, {
-                  "method": "POST",
-                  "headers": {
-                    "Accept": "*/*",
-                    "Accept-Encoding": "gzip, deflate",
-                    "Authorization": `Bearer ${process.env.BEAM_API_KEY}`,
-                    "Content-Type": "application/json"
-                  },
-                  "body": JSON.stringify({
-                    base_url: config.url,
-                    url: request.loadedUrl,
-                    readable_filename: title,
-                    content: html,
-                    course_name: config.courseName,
-                    groups: config.documentGroups,
-                    // s3_paths: s3Key,
-                  })
-                })
-                  .then(response => response.text())
-                  // .then(text => {
-                  //   console.log(`In success case -- Data ingested for URL: ${request.loadedUrl}`);
-                  //   console.log(text)
-                  // })
-                  .catch(err => console.error(err));
+              //   if (!ingestUrl) {
+              //     console.error('Error: INGEST_URL environment variable is not defined.');
+              //     return;
+              //   }
 
-                // ingestionPromises.push(
-                //   axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
-                //     base_url: config.url,
-                //     url: request.loadedUrl,
-                //     title: title,
-                //     content: html,
-                //     courseName: config.courseName,
-                //   }).then(() => {
-                //     console.log(`Data ingested for URL: ${request.loadedUrl}`);
-                //   }).catch(error => {
-                //     console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
-                //   })
-                // )
-              } else {
-                console.error('Error: URL is undefined. Title is: ', title);
-              }
+              //   fetch(ingestUrl, {
+              //     "method": "POST",
+              //     "headers": {
+              //       "Accept": "*/*",
+              //       "Accept-Encoding": "gzip, deflate",
+              //       "Authorization": `Bearer ${process.env.BEAM_API_KEY}`,
+              //       "Content-Type": "application/json"
+              //     },
+              //     "body": JSON.stringify({
+              //       base_url: config.url,
+              //       url: request.loadedUrl,
+              //       readable_filename: title,
+              //       content: html,
+              //       course_name: config.courseName,
+              //       groups: config.documentGroups,
+              //       // s3_paths: s3Key,
+              //     })
+              //   })
+              //     .then(response => response.text())
+              //     // .then(text => {
+              //     //   console.log(`In success case -- Data ingested for URL: ${request.loadedUrl}`);
+              //     //   console.log(text)
+              //     // })
+              //     .catch(err => console.error(err));
+
+              //   // ingestionPromises.push(
+              //   //   axios.post('https://flask-production-751b.up.railway.app/ingest-web-text', {
+              //   //     base_url: config.url,
+              //   //     url: request.loadedUrl,
+              //   //     title: title,
+              //   //     content: html,
+              //   //     courseName: config.courseName,
+              //   //   }).then(() => {
+              //   //     console.log(`Data ingested for URL: ${request.loadedUrl}`);
+              //   //   }).catch(error => {
+              //   //     console.error(`Failed to ingest data for URL: ${request.loadedUrl}`, error.name, error.message, error.data);
+              //   //   })
+              //   // )
+              // } else {
+              //   console.error('Error: URL is undefined. Title is: ', title);
+              // }
+              
             }
 
             // Disabled this due to weird type error all of a sudden, after adding the try catch
@@ -130,7 +143,7 @@ export async function crawl(rawConfig: Config) {
             //   await config.onVisitPage({ page, pushData });
             // }
 
-            page.off('console', consoleListener); // remove listener to avoid memory leak
+            // page.off('console', consoleListener); // remove listener to avoid memory leak
 
             // Extract links from the current page and add them to the crawling queue.
             // Docs https://crawlee.dev/docs/introduction/adding-urls#filtering-links-to-same-domain
@@ -145,17 +158,17 @@ export async function crawl(rawConfig: Config) {
                     ? [config.exclude]
                     : config.exclude ?? [],
 
-                // Keep this here so if we encounter .pdfs (no matter what URL or strategy), we still grab them
-                transformRequestFunction(req) {
-                  if (req.url.endsWith('.pdf')) {
-                    // Download PDFs specially 
-                    console.log(`Downloading PDF: ${req.url}`);
-                    handlePdf(config.courseName, config.url, req.url, config.documentGroups);
-                    return false;
-                  } else {
-                    return req;
-                  }
-                },
+                // // Keep this here so if we encounter .pdfs (no matter what URL or strategy), we still grab them
+                // transformRequestFunction(req) {
+                //   if (req.url.endsWith('.pdf')) {
+                //     // Download PDFs specially 
+                //     console.log(`Downloading PDF: ${req.url}`);
+                //     // handlePdf(config.courseName, config.url, req.url, config.documentGroups);
+                //     return false;
+                //   } else {
+                //     return req;
+                //   }
+                // },
               })
             } else {
               // strategy: 'equal-and-below' == stay on the same domain and subdomains (aka. hostname)
@@ -169,51 +182,51 @@ export async function crawl(rawConfig: Config) {
                     : config.exclude ?? [],
 
                 // Keep this here so if we encounter .pdfs (no matter what URL or strategy), we still grab them
-                transformRequestFunction(req) {
-                  if (req.url.endsWith('.pdf')) {
-                    // Download PDFs specially 
-                    console.log(`Downloading PDF: ${req.url}`);
-                    handlePdf(config.courseName, config.url, req.url, config.documentGroups);
-                    return false;
-                  } else {
-                    return req;
-                  }
-                },
+                // transformRequestFunction(req) {
+                //   if (req.url.endsWith('.pdf')) {
+                //     // Download PDFs specially 
+                //     console.log(`Downloading PDF: ${req.url}`);
+                //     // handlePdf(config.courseName, config.url, req.url, config.documentGroups);
+                //     return false;
+                //   } else {
+                //     return req;
+                //   }
+                // },
               });
             }
           },
           // Comment this option to scrape the full website.
           maxRequestsPerCrawl: config.maxPagesToCrawl,
           // Uncomment this option to see the browser window.
-          // headless: false,
-          preNavigationHooks: [
-            // Abort requests for certain resource types
-            async ({ request, page, log }) => {
-              // If there are no resource exclusions, return
-              const RESOURCE_EXCLUSTIONS = config.resourceExclusions ?? [];
-              if (RESOURCE_EXCLUSTIONS.length === 0) {
-                return;
-              }
-              if (config.cookie) {
-                const cookies = (
-                  Array.isArray(config.cookie) ? config.cookie : [config.cookie]
-                ).map((cookie: { name: any; value: any; }) => {
-                  return {
-                    name: cookie.name,
-                    value: cookie.value,
-                    url: request.loadedUrl,
-                  };
-                });
-                await page.context().addCookies(cookies);
-              }
-              await page.route(`**\/*.{${RESOURCE_EXCLUSTIONS.join()}}`, (route) =>
-                route.abort("aborted"),
-              );
-              log.info(
-                `Aborting requests for as this is a resource excluded route`,
-              );
-            },
-          ],
+          // // headless: false,
+          // preNavigationHooks: [
+          //   // Abort requests for certain resource types
+          //   async ({ request, page, log }) => {
+          //     // If there are no resource exclusions, return
+          //     const RESOURCE_EXCLUSTIONS = config.resourceExclusions ?? [];
+          //     if (RESOURCE_EXCLUSTIONS.length === 0) {
+          //       return;
+          //     }
+          //     if (config.cookie) {
+          //       const cookies = (
+          //         Array.isArray(config.cookie) ? config.cookie : [config.cookie]
+          //       ).map((cookie: { name: any; value: any; }) => {
+          //         return {
+          //           name: cookie.name,
+          //           value: cookie.value,
+          //           url: request.loadedUrl,
+          //         };
+          //       });
+          //       await page.context().addCookies(cookies);
+          //     }
+          //     await page.route(`**\/*.{${RESOURCE_EXCLUSTIONS.join()}}`, (route) =>
+          //       route.abort("aborted"),
+          //     );
+          //     log.info(
+          //       `Aborting requests for as this is a resource excluded route`,
+          //     );
+          //   },
+          // ],
         },
           new Configuration({
             persistStorage: false,
@@ -244,8 +257,11 @@ export async function crawl(rawConfig: Config) {
     }
   }
   // Before returning from the function, wait for all the ingestion promises to resolve
-  await Promise.all(ingestionPromises);
-  return pageCounter;
+  // await Promise.all(ingestionPromises);
+  return {
+    pageCount: pageCounter,
+    urls: crawledUrls
+  };
 }
 
 // ----- HELPERS -----

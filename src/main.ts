@@ -46,9 +46,13 @@ app.post('/crawl', async (req: Request, res: Response) => {
         // };
 
         const results = await crawl(req.body.params);
-        console.log(`Crawl completed successfully. Number of results: ${results}`);
-        res.status(200).json(`Crawl completed successfully. Number of results: ${results}`);
-    } catch (error) {
+        console.log(`Crawl completed successfully. Number of results: ${results.pageCount}`);
+        res.status(200).json({
+            message: "Crawl completed successfully",
+            pageCount: results.pageCount,
+            urls: results.urls
+          });   
+         } catch (error) {
         const e = error as Error;
         res.status(500).json({ error: 'An error occurred during the upload', errorTitle: e.name, errorMessage: e.message });
     } finally {
