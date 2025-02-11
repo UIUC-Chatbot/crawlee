@@ -76,7 +76,7 @@ export async function crawl(rawConfig: Config) {
 
               // Asynchronously call the ingestWebscrape endpoint without awaiting the result
               if (html) {
-                const ingestUrl = 'https://app.beam.cloud/taskqueue/ruixin-pr220_ingest_task_queue/latest';
+                const ingestUrl = 'https://app.beam.cloud/taskqueue/ingest_task_queue/latest';
 
                 if (!ingestUrl) {
                   console.error('Error: INGEST_URL environment variable is not defined.');
