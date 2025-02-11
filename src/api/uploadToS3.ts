@@ -2,6 +2,7 @@
 import * as path from 'path';
 import axios from 'axios';
 import { S3Client, PutObjectCommand, HeadBucketCommand, CreateBucketCommand } from '@aws-sdk/client-s3';
+import { supabase } from '../utils/supabaseClient.js';
 
 export const aws_config = {
   bucketName: process.env.S3_BUCKET_NAME,
@@ -28,9 +29,9 @@ export async function uploadPdfToS3(url: string, courseName: string) {
     // If MINIO_ENDPOINT is defined, use it instead of AWS S3.
     ...(process.env.MINIO_ENDPOINT
       ? {
-          endpoint: process.env.MINIO_ENDPOINT,
-          forcePathStyle: true,
-        }
+        endpoint: process.env.MINIO_ENDPOINT,
+        forcePathStyle: true,
+      }
       : {}),
   })
   const s3BucketName = aws_config.bucketName;
@@ -116,6 +117,21 @@ export async function ingestPdf(s3Key: string, courseName: string, base_url: str
   }
 
   try {
+    const { error } = await supabase.from('documents_in_progress').insert({
+      base_url: base_url,
+      url: url,
+      readable_filename: path.basename(s3Key),
+      s3_path: s3Key,
+      course_name: courseName,
+      doc_groups: documentGroups,
+    })
+
+    if (error) {
+      console.error(
+        '❌❌ Supabase failed to insert into `documents_in_progress`:',
+        error,)
+    }
+
     fetch(ingestUrl, {
       "method": "POST",
       "headers": {
