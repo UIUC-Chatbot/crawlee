@@ -110,7 +110,7 @@ export async function uploadPdfToS3(url: string, courseName: string) {
 }
 
 export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string, documentGroups: string[]) {
-  const ingestUrl = 'https://app.beam.cloud/taskqueue/ruixin-pr220_ingest_task_queue/latest';
+  const ingestUrl = process.env.INGEST_URL;
   if (!ingestUrl) {
     console.error('Error: INGEST_URL environment variable is not defined.');
     return;
