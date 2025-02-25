@@ -47,6 +47,54 @@ RUN npm --quiet set progress=false \
 # for most source file changes.
 COPY --chown=myuser . ./
 
+# Install dependencies for Playwright
+RUN apt-get update && apt-get install -y \
+    libwoff1 \
+    libopus0 \
+    libwebp7 \
+    libwebpdemux2 \
+    libenchant-2-2 \
+    libgudev-1.0-0 \
+    libsecret-1-0 \
+    libhyphen0 \
+    libgdk-pixbuf2.0-0 \
+    libegl1 \
+    libnotify4 \
+    libxslt1.1 \
+    libevent-2.1-7 \
+    libgles2 \
+    libvpx7 \
+    libxcomposite1 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libepoxy0 \
+    libgtk-3-0 \
+    libharfbuzz-icu0 \
+    libgstreamer-gl1.0-0 \
+    libgstreamer-plugins-bad1.0-0 \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    # Additional dependencies that might be needed
+    xvfb \
+    wget \
+    xauth \
+    fonts-noto-color-emoji \
+    libnss3 \
+    libcups2 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libgbm1 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libxss1 \
+    libxtst6
+
+# Install Playwright browsers and dependencies
+RUN npx playwright install --with-deps chromium
 
 # Run the image. If you know you won't need headful browsers,
 # you can remove the XVFB start script for a micro perf gain.
