@@ -26,11 +26,13 @@ export async function crawl(rawConfig: Config) {
 
       try {
         crawler = new PlaywrightCrawler({
-          // Add these browser launch options
           launchContext: {
             launchOptions: {
-              args: ['--no-sandbox', '--disable-setuid-sandbox'],
-              // Use chromium instead of chrome
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+              ],
               channel: 'chromium',
             },
           },
