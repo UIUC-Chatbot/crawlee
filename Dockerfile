@@ -3,40 +3,27 @@
 # You can also use any other image from Docker Hub.
 FROM apify/actor-node-playwright-chrome:20 AS builder
 
-# Copy just package.json and package-lock.json
-# to speed up the build using Docker layer cache.
+# Copy package files
 COPY --chown=myuser package*.json ./
 
-# Install all dependencies. Don't audit to speed up the installation.
+# Install all dependencies
 RUN npm install --include=dev --audit=false
 
-# Next, copy the source files using the user set
-# in the base image.
+# Copy source files
 COPY --chown=myuser . ./
 
-# Install all dependencies and build the project.
-# Don't audit to speed up the installation.
+# Build project
 RUN npm run build
 
 # Create final image
 FROM apify/actor-node-playwright-chrome:20
 
-# Copy only built JS files from builder image
+# Copy built files
 COPY --from=builder --chown=myuser /home/myuser/dist ./dist
-
-# Copy just package.json and package-lock.json
 COPY --chown=myuser package*.json ./
 
-# Install NPM packages and Playwright
-RUN npm --quiet set progress=false \
-    && npm install --omit=dev --omit=optional \
-    && npx playwright install chromium \
-    && npx playwright install-deps chromium
-
-# Copy remaining files
-COPY --chown=myuser . ./
-
-# Install dependencies for Playwright
+# Install dependencies and Playwright - combine all installations to reduce layers
+USER root
 RUN apt-get update && apt-get install -y \
     libwoff1 \
     libopus0 \
@@ -63,7 +50,6 @@ RUN apt-get update && apt-get install -y \
     libgstreamer-plugins-bad1.0-0 \
     gstreamer1.0-plugins-good \
     gstreamer1.0-plugins-bad \
-    # Additional dependencies that might be needed
     xvfb \
     wget \
     xauth \
@@ -80,10 +66,17 @@ RUN apt-get update && apt-get install -y \
     libnss3 \
     libpango-1.0-0 \
     libxss1 \
-    libxtst6
+    libxtst6 && \
+    npm --quiet set progress=false && \
+    npm install --omit=dev --omit=optional && \
+    npx playwright install chromium && \
+    npx playwright install-deps chromium
 
-# Install Playwright browsers and dependencies
-RUN npx playwright install --with-deps chromium
+# Copy remaining files
+COPY --chown=myuser . ./
+
+# Switch back to non-root user for security
+USER myuser
 
 # Run the image
 CMD ./start_xvfb_and_run_cmd.sh && npm run start:prod --silent
