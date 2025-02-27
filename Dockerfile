@@ -67,10 +67,12 @@ RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libxss1 \
     libxtst6 && \
+    rm -rf /var/lib/apt/lists/* && \
     npm --quiet set progress=false && \
     npm install --omit=dev --omit=optional && \
-    npx playwright install chromium && \
-    npx playwright install-deps chromium
+    # Install Playwright with all dependencies
+    npx playwright install && \
+    npx playwright install-deps
 
 # Copy remaining files
 COPY --chown=myuser . ./
