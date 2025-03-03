@@ -125,10 +125,10 @@ export async function crawl(rawConfig: Config) {
                   })
                 })
                   .then(response => response.text())
-                  // .then(text => {
-                  //   console.log(`In success case -- Data ingested for URL: ${request.loadedUrl}`);
-                  //   console.log(text)
-                  // })
+                  .then(text => {
+                    console.log(`In success case -- Data ingested for URL: ${request.loadedUrl}`);
+                    console.log(text)
+                  })
                   .catch(err => console.error(err));
 
                 // ingestionPromises.push(
