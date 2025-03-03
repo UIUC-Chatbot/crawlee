@@ -80,5 +80,6 @@ COPY --chown=myuser . ./
 # Switch back to non-root user for security
 USER myuser
 
+
 # Run the image
 CMD ./start_xvfb_and_run_cmd.sh && npm run start:prod --silent

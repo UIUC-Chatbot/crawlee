@@ -85,7 +85,7 @@ export async function crawl(rawConfig: Config) {
               // Asynchronously call the ingestWebscrape endpoint without awaiting the result
               if (html) {
                 const ingestUrl = process.env.INGEST_URL;
-
+                console.log('ingestUrl', ingestUrl)
                 if (!ingestUrl) {
                   console.error('Error: INGEST_URL environment variable is not defined.');
                   return;
