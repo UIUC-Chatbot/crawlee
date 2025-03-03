@@ -110,7 +110,8 @@ export async function uploadPdfToS3(url: string, courseName: string) {
 }
 
 export async function ingestPdf(s3Key: string, courseName: string, base_url: string, url: string, documentGroups: string[]) {
-  const ingestUrl = process.env.INGEST_URL;
+  const ingestUrl = process.env.CW_INGEST_URL;
+  console.log('ingestUrl', ingestUrl)
   if (!ingestUrl) {
     console.error('Error: INGEST_URL environment variable is not defined.');
     return;
@@ -150,10 +151,10 @@ export async function ingestPdf(s3Key: string, courseName: string, base_url: str
       })
     })
       .then(response => response.text())
-      // .then(text => {
-      //   console.log(`IN PDF success case -- Data ingested for pdf: ${path.basename(s3Key)}`);
-      //   console.log(text)
-      // })
+      .then(text => {
+        console.log(`IN PDF success case -- Data ingested for pdf: ${path.basename(s3Key)}`);
+        console.log(text)
+      })
       .catch(err => console.error(err));
   } catch (error) {
     if (error instanceof Error) {

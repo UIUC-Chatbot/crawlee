@@ -3,51 +3,83 @@
 # You can also use any other image from Docker Hub.
 FROM apify/actor-node-playwright-chrome:20 AS builder
 
-# Copy just package.json and package-lock.json
-# to speed up the build using Docker layer cache.
+# Copy package files
 COPY --chown=myuser package*.json ./
 
-# Install all dependencies. Don't audit to speed up the installation.
+# Install all dependencies
 RUN npm install --include=dev --audit=false
 
-# Next, copy the source files using the user set
-# in the base image.
+# Copy source files
 COPY --chown=myuser . ./
 
-# Install all dependencies and build the project.
-# Don't audit to speed up the installation.
+# Build project
 RUN npm run build
 
 # Create final image
 FROM apify/actor-node-playwright-chrome:20
 
-# Copy only built JS files from builder image
+# Copy built files
 COPY --from=builder --chown=myuser /home/myuser/dist ./dist
-
-# Copy just package.json and package-lock.json
-# to speed up the build using Docker layer cache.
 COPY --chown=myuser package*.json ./
 
-# Install NPM packages, skip optional and development dependencies to
-# keep the image small. Avoid logging too much and print the dependency
-# tree for debugging
-RUN npm --quiet set progress=false \
-    && npm install --omit=dev --omit=optional \
-    && echo "Installed NPM packages:" \
-    && (npm list --omit=dev --all || true) \
-    && echo "Node.js version:" \
-    && node --version \
-    && echo "NPM version:" \
-    && npm --version \
-    && echo "running npx playwright install..." \
-    && npx playwright install
+# Install dependencies and Playwright - combine all installations to reduce layers
+USER root
+RUN apt-get update && apt-get install -y \
+    libwoff1 \
+    libopus0 \
+    libwebp7 \
+    libwebpdemux2 \
+    libenchant-2-2 \
+    libgudev-1.0-0 \
+    libsecret-1-0 \
+    libhyphen0 \
+    libgdk-pixbuf2.0-0 \
+    libegl1 \
+    libnotify4 \
+    libxslt1.1 \
+    libevent-2.1-7 \
+    libgles2 \
+    libvpx7 \
+    libxcomposite1 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libepoxy0 \
+    libgtk-3-0 \
+    libharfbuzz-icu0 \
+    libgstreamer-gl1.0-0 \
+    libgstreamer-plugins-bad1.0-0 \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    xvfb \
+    wget \
+    xauth \
+    fonts-noto-color-emoji \
+    libnss3 \
+    libcups2 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libgbm1 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libxss1 \
+    libxtst6 && \
+    rm -rf /var/lib/apt/lists/* && \
+    npm --quiet set progress=false && \
+    npm install --omit=dev --omit=optional && \
+    # Install Playwright with all dependencies
+    npx playwright install && \
+    npx playwright install-deps
 
-# Next, copy the remaining files and directories with the source code.
-# Since we do this after NPM install, quick build will be really fast
-# for most source file changes.
+# Copy remaining files
 COPY --chown=myuser . ./
 
+# Switch back to non-root user for security
+USER myuser
 
-# Run the image. If you know you won't need headful browsers,
-# you can remove the XVFB start script for a micro perf gain.
+
+# Run the image
 CMD ./start_xvfb_and_run_cmd.sh && npm run start:prod --silent

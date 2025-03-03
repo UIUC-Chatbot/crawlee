@@ -26,8 +26,16 @@ export async function crawl(rawConfig: Config) {
 
       try {
         crawler = new PlaywrightCrawler({
-
-          // TODO: add these back... 
+          launchContext: {
+            launchOptions: {
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+              ],
+              channel: 'chromium',
+            },
+          },
           maxConcurrency: config.maxConcurrency,
           maxRequestsPerMinute: config.maxRequestsPerMinute,
 
@@ -76,8 +84,8 @@ export async function crawl(rawConfig: Config) {
 
               // Asynchronously call the ingestWebscrape endpoint without awaiting the result
               if (html) {
-                const ingestUrl = process.env.INGEST_URL;
-
+                const ingestUrl = process.env.CW_INGEST_URL;
+                console.log('ingestUrl', ingestUrl)
                 if (!ingestUrl) {
                   console.error('Error: INGEST_URL environment variable is not defined.');
                   return;
@@ -117,10 +125,10 @@ export async function crawl(rawConfig: Config) {
                   })
                 })
                   .then(response => response.text())
-                  // .then(text => {
-                  //   console.log(`In success case -- Data ingested for URL: ${request.loadedUrl}`);
-                  //   console.log(text)
-                  // })
+                  .then(text => {
+                    console.log(`In success case -- Data ingested for URL: ${request.loadedUrl}`);
+                    console.log(text)
+                  })
                   .catch(err => console.error(err));
 
                 // ingestionPromises.push(
