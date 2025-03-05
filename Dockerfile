@@ -40,7 +40,7 @@ RUN npm --quiet set progress=false \
     && echo "NPM version:" \
     && npm --version \
     && echo "running npx playwright install..." \
-    && npx playwright install --with-deps
+    && npx playwright install
 
 # Next, copy the remaining files and directories with the source code.
 # Since we do this after NPM install, quick build will be really fast
